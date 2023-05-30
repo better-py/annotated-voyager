@@ -208,6 +208,10 @@ class Voyager:
         difficulty = (
             "easy" if len(self.curriculum_agent.completed_tasks) > 15 else "peaceful"
         )
+
+        #
+        # todo x: HTTP 请求本地启动的 mineflayer 服务
+        #
         # step to peek an observation
         events = self.env.step(
             "bot.chat(`/time set ${getNextTime()}`);\n"
@@ -269,7 +273,7 @@ class Voyager:
             # =======================================================================
 
             #
-            # todo x: HTTP 请求，远程执行 js 代码
+            # todo x: HTTP 请求本地启动的 mineflayer 服务, 远程执行 js 代码
             #
             events = self.env.step(
                 code,
@@ -308,7 +312,7 @@ class Voyager:
                 # =======================================================================
 
                 #
-                # todo x: HTTP 请求，远程执行 js 代码
+                # todo x: HTTP 请求本地启动的 mineflayer 服务, 远程执行 js 代码
                 #
                 new_events = self.env.step(
                     f"await givePlacedItemBack(bot, {U.json_dumps(blocks)}, {U.json_dumps(positions)})",
@@ -409,6 +413,10 @@ class Voyager:
                 }
             )
             self.resume = True
+
+        #
+        # todo x: HTTP 请求本地启动的 mineflayer 服务
+        #
         self.last_events = self.env.step("")
 
         # =======================================================================
@@ -529,6 +537,10 @@ class Voyager:
         )
         self.curriculum_agent.completed_tasks = []
         self.curriculum_agent.failed_tasks = []
+
+        #
+        # todo x: HTTP 请求本地启动的 mineflayer 服务
+        #
         self.last_events = self.env.step("")
         if not sub_tasks:
             sub_tasks = self.curriculum_agent.decompose_task(task, self.last_events)

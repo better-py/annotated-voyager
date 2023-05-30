@@ -154,8 +154,10 @@ class VoyagerEnv(gym.Env):
                 )
             return res.json()
 
+    ########################################################################################
+
     #
-    #
+    # todo x: HTTP POST 请求本地 mineflayer 服务， 远程执行 js 代码
     #
     def step(
             self,
@@ -194,6 +196,8 @@ class VoyagerEnv(gym.Env):
         # todo x: 执行暂停操作
         self.pause()
         return json.loads(returned_data)
+
+    ########################################################################################
 
     def render(self):
         raise NotImplementedError("render is not implemented")
