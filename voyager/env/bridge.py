@@ -17,13 +17,13 @@ from .process_monitor import SubprocessMonitor
 
 class VoyagerEnv(gym.Env):
     def __init__(
-        self,
-        mc_port=None,
-        azure_login=None,
-        server_host="http://127.0.0.1",
-        server_port=3000,
-        request_timeout=600,
-        log_path="./logs",
+            self,
+            mc_port=None,
+            azure_login=None,
+            server_host="http://127.0.0.1",
+            server_port=3000,
+            request_timeout=600,
+            log_path="./logs",
     ):
         if not mc_port and not azure_login:
             raise ValueError("Either mc_port or azure_login must be specified")
@@ -80,6 +80,12 @@ class VoyagerEnv(gym.Env):
             self.mc_port = self.mc_instance.port
             self.reset_options["port"] = self.mc_instance.port
             print(f"Server started on port {self.reset_options['port']}")
+
+        # =======================================================================
+
+        #
+        # todo x: 检查 mineflayer 进程是否存在
+        #
         retry = 0
         while not self.mineflayer.is_running:
             print("Mineflayer process has exited, restarting")
@@ -90,6 +96,10 @@ class VoyagerEnv(gym.Env):
                 else:
                     continue
             print(self.mineflayer.ready_line)
+
+            #
+            # todo x: 发送请求
+            #
             res = requests.post(
                 f"{self.server}/start",
                 json=self.reset_options,
@@ -102,25 +112,40 @@ class VoyagerEnv(gym.Env):
                 )
             return res.json()
 
+    #
+    #
+    #
     def step(
-        self,
-        code: str,
-        programs: str = "",
+            self,
+            code: str,
+            programs: str = "",
     ) -> Tuple[ObsType, SupportsFloat, bool, bool, Dict[str, Any]]:
         if not self.has_reset:
             raise RuntimeError("Environment has not been reset yet")
         self.check_process()
         self.unpause()
+
+        #
+        # todo x: 远程执行 js 代码
+        #
         data = {
-            "code": code,
+            "code": code,  # todo x: js 代码
             "programs": programs,
         }
+
+        # =======================================================================
+
+        #
+        # todo x: 发送HTTP请求， 执行 step 操作
+        #
         res = requests.post(
             f"{self.server}/step", json=data, timeout=self.request_timeout
         )
         if res.status_code != 200:
             raise RuntimeError("Failed to step Minecraft server")
         returned_data = res.json()
+
+        # todo x: 执行暂停操作
         self.pause()
         return json.loads(returned_data)
 
@@ -128,10 +153,10 @@ class VoyagerEnv(gym.Env):
         raise NotImplementedError("render is not implemented")
 
     def reset(
-        self,
-        *,
-        seed=None,
-        options=None,
+            self,
+            *,
+            seed=None,
+            options=None,
     ) -> Tuple[ObsType, Dict[str, Any]]:
         if options is None:
             options = {}
@@ -174,6 +199,9 @@ class VoyagerEnv(gym.Env):
 
     def pause(self):
         if self.mineflayer.is_running and not self.server_paused:
+            #
+            # todo x: 执行暂停操作
+            #
             res = requests.post(f"{self.server}/pause")
             if res.status_code == 200:
                 self.server_paused = True

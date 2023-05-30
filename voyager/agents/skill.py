@@ -28,8 +28,17 @@ class SkillManager:
         U.f_mkdir(f"{ckpt_dir}/skill/code")
         U.f_mkdir(f"{ckpt_dir}/skill/description")
         U.f_mkdir(f"{ckpt_dir}/skill/vectordb")
+
+        # =======================================================================
+
+        #
+        # todo x： 遍历 voyager/control_primitives 文件夹下的 js 文件， 并返回 js 文件内容
+        #
         # programs for env execution
         self.control_primitives = load_control_primitives()
+
+        # =======================================================================
+
         if resume:
             print(f"\033[33mLoading Skill Manager from {ckpt_dir}/skill\033[0m")
             self.skills = U.load_json(f"{ckpt_dir}/skill/skills.json")
@@ -60,6 +69,12 @@ class SkillManager:
         programs = ""
         for skill_name, entry in self.skills.items():
             programs += f"{entry['code']}\n\n"
+
+        # =======================================================================
+
+        #
+        # todo x: js 文件内容
+        #
         for primitives in self.control_primitives:
             programs += f"{primitives}\n\n"
         return programs

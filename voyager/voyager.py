@@ -258,10 +258,19 @@ class Voyager:
         success = False
         if isinstance(parsed_result, dict):
             code = parsed_result["program_code"] + "\n" + parsed_result["exec_code"]
+
+            # =======================================================================
+
+            #
+            # todo x: HTTP 请求，远程执行 js 代码
+            #
             events = self.env.step(
                 code,
-                programs=self.skill_manager.programs,
+                programs=self.skill_manager.programs,  # todo x： js 代码
             )
+
+            # =======================================================================
+
             self.recorder.record(events, self.task)
             self.action_agent.update_chest_memory(events[-1][1]["nearbyChests"])
 
@@ -288,9 +297,15 @@ class Voyager:
                         position = event["status"]["position"]
                         blocks.append(block)
                         positions.append(position)
+
+                # =======================================================================
+
+                #
+                # todo x: HTTP 请求，远程执行 js 代码
+                #
                 new_events = self.env.step(
                     f"await givePlacedItemBack(bot, {U.json_dumps(blocks)}, {U.json_dumps(positions)})",
-                    programs=self.skill_manager.programs,
+                    programs=self.skill_manager.programs,  # todo x： js 代码
                 )
                 events[-1][1]["inventory"] = new_events[-1][1]["inventory"]
                 events[-1][1]["voxels"] = new_events[-1][1]["voxels"]
