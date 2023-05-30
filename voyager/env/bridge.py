@@ -33,11 +33,26 @@ class VoyagerEnv(gym.Env):
             )
         self.mc_port = mc_port
         self.azure_login = azure_login
+
+        # =======================================================================
+
+        #
+        # todo x:
+        #
         self.server = f"{server_host}:{server_port}"
         self.server_port = server_port
         self.request_timeout = request_timeout
         self.log_path = log_path
+
+        # =======================================================================
+
+        #
+        # todo x: 调用 Nodejs， 运行 mineflayer/index.js， 完整路径： voyager/env/mineflayer/index.js
+        #
         self.mineflayer = self.get_mineflayer_process(server_port)
+
+        # =======================================================================
+
         if azure_login:
             self.mc_instance = self.get_mc_instance()
         else:
@@ -47,10 +62,20 @@ class VoyagerEnv(gym.Env):
         self.connected = False
         self.server_paused = False
 
+    #
+    # todo x: 调用 Nodejs， 运行 mineflayer/index.js
+    #
     def get_mineflayer_process(self, server_port):
         U.f_mkdir(self.log_path, "mineflayer")
+
+        # todo x: 获取当前文件的绝对路径
         file_path = os.path.abspath(os.path.dirname(__file__))
+
         return SubprocessMonitor(
+            #
+            # todo x: 调用 Nodejs， 运行 mineflayer/index.js
+            #   - 完整路径： voyager/env/mineflayer/index.js
+            #
             commands=[
                 "node",
                 U.f_join(file_path, "mineflayer/index.js"),
@@ -76,7 +101,12 @@ class VoyagerEnv(gym.Env):
             #     self.mc_instance.check_process()
             #     if not self.mc_instance.is_running:
             print("Starting Minecraft server")
+
+            #
+            # todo x:
+            #
             self.mc_instance.run()
+
             self.mc_port = self.mc_instance.port
             self.reset_options["port"] = self.mc_instance.port
             print(f"Server started on port {self.reset_options['port']}")
@@ -89,6 +119,10 @@ class VoyagerEnv(gym.Env):
         retry = 0
         while not self.mineflayer.is_running:
             print("Mineflayer process has exited, restarting")
+
+            #
+            #
+            #
             self.mineflayer.run()
             if not self.mineflayer.is_running:
                 if retry > 3:
@@ -97,6 +131,8 @@ class VoyagerEnv(gym.Env):
                     continue
             print(self.mineflayer.ready_line)
 
+            # =======================================================================
+
             #
             # todo x: 发送请求
             #
@@ -104,7 +140,7 @@ class VoyagerEnv(gym.Env):
                 f"{self.server}/start",
                 json=self.reset_options,
                 timeout=self.request_timeout,
-            )
+            )  # todo x: 执行开发操作
             if res.status_code != 200:
                 self.mineflayer.stop()
                 raise RuntimeError(
@@ -122,8 +158,11 @@ class VoyagerEnv(gym.Env):
     ) -> Tuple[ObsType, SupportsFloat, bool, bool, Dict[str, Any]]:
         if not self.has_reset:
             raise RuntimeError("Environment has not been reset yet")
-        self.check_process()
-        self.unpause()
+
+        self.check_process()  # todo x: 检查进程状态
+        self.unpause()  # todo x: fixme, 内部实现参数，似乎传错了？ 潜在 bug
+
+        # =======================================================================
 
         #
         # todo x: 远程执行 js 代码
@@ -178,6 +217,9 @@ class VoyagerEnv(gym.Env):
         self.mineflayer.stop()
         time.sleep(1)  # wait for mineflayer to exit
 
+        #
+        # todo x:
+        #
         returned_data = self.check_process()
         self.has_reset = True
         self.connected = True
@@ -189,7 +231,7 @@ class VoyagerEnv(gym.Env):
     def close(self):
         self.unpause()
         if self.connected:
-            res = requests.post(f"{self.server}/stop")
+            res = requests.post(f"{self.server}/stop")  # todo x: 执行关闭操作
             if res.status_code == 200:
                 self.connected = False
         if self.mc_instance:
@@ -199,17 +241,14 @@ class VoyagerEnv(gym.Env):
 
     def pause(self):
         if self.mineflayer.is_running and not self.server_paused:
-            #
-            # todo x: 执行暂停操作
-            #
-            res = requests.post(f"{self.server}/pause")
+            res = requests.post(f"{self.server}/pause")  # todo x: 执行暂停操作
             if res.status_code == 200:
                 self.server_paused = True
         return self.server_paused
 
     def unpause(self):
         if self.mineflayer.is_running and self.server_paused:
-            res = requests.post(f"{self.server}/pause")
+            res = requests.post(f"{self.server}/pause")  # todo x: 执行取消暂停操作， 这里似乎有个 bug !!!， 参数传错了: unpause
             if res.status_code == 200:
                 self.server_paused = False
             else:

@@ -10,13 +10,13 @@ from .process_monitor import SubprocessMonitor
 
 class MinecraftInstance:
     def __init__(
-        self,
-        client_id,
-        redirect_url,
-        secret_value,
-        version,
-        mineflayer,
-        log_path="logs",
+            self,
+            client_id,
+            redirect_url,
+            secret_value,
+            version,
+            mineflayer,
+            log_path="logs",
     ):
         self.client_id = client_id
         self.redirect_url = redirect_url
@@ -34,6 +34,10 @@ class MinecraftInstance:
                 print(e)
 
         self.mc_command = self.get_mc_command()
+
+        #
+        #
+        #
         self.mc_process = SubprocessMonitor(
             commands=self.mc_command,
             name="minecraft",
@@ -58,8 +62,13 @@ class MinecraftInstance:
             log_path=U.f_join(self.log_path, "mineflayer"),
         )
 
+    #
+    #
+    #
     def get_mc_command(self):
         file_path = os.path.abspath(os.path.dirname(__file__))
+
+        # todo x: 配置文件不存在， 登录+生成
         if not U.f_exists(file_path, "config.json"):
             (
                 login_url,
@@ -99,10 +108,23 @@ class MinecraftInstance:
                 "uuid": login_data["id"],
                 "token": login_data["access_token"],
             }
+
+            #
+            # todo x: 生成配置文件
+            #
             U.json_dump(options, file_path, "config.json")
             print(f"Login success, save to {U.f_join(file_path, 'config.json')}")
 
+        # =======================================================================
+
+        # todo x: 读取配置文件
         options = U.json_load(file_path, "config.json")
+
+        # =======================================================================
+
+        #
+        # todo x: 生成 minecraft 命令
+        #
         mc_command = minecraft_launcher_lib.command.get_minecraft_command(
             self.version, self.mc_dir, options
         )
@@ -110,7 +132,11 @@ class MinecraftInstance:
         return mc_command
 
     def run(self):
+        #
+        #
+        #
         self.mc_process.run()
+
         pattern = r"Started serving on (\d+)"
         match = re.search(pattern, self.mc_process.ready_line)
         if match:

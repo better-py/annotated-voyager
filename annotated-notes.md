@@ -1,4 +1,3 @@
-
 # voyager 源码分析笔记：
 
 ## 注解说明：
@@ -6,7 +5,6 @@
 - ✅️ `# todo x`： 为注解标识符， 方便利用 IDE 的 TODO 工具，快速筛查注解点。
 
 ![](./images/note-1.png)
-
 
 ## 核心依赖库：
 
@@ -18,5 +16,11 @@
 ## 源码入口：
 
 - ✅️ [voyager/voyager.py](voyager/voyager.py)
+
+### 执行 JS 代码：
+
+- ✅️ JS 代码位置： [control_primitives](voyager/control_primitives)
+    - voyager.step() 中调用 load_control_primitives() 在 [control_primitives/__init
+      __.py](voyager/control_primitives/__init__.py)
 
 

@@ -13,14 +13,14 @@ import voyager.utils as U
 
 class SubprocessMonitor:
     def __init__(
-        self,
-        commands: List[str],
-        name: str,
-        ready_match: str = r".*",
-        log_path: str = "logs",
-        callback_match: str = r"^(?!x)x$",  # regex that will never match
-        callback: callable = None,
-        finished_callback: callable = None,
+            self,
+            commands: List[str],
+            name: str,
+            ready_match: str = r".*",
+            log_path: str = "logs",
+            callback_match: str = r"^(?!x)x$",  # regex that will never match
+            callback: callable = None,
+            finished_callback: callable = None,
     ):
         self.commands = commands
         start_time = time.strftime("%Y%m%d_%H%M%S")
@@ -42,6 +42,9 @@ class SubprocessMonitor:
         self.finished_callback = finished_callback
         self.thread = None
 
+    #
+    #
+    #
     def _start(self):
         self.logger.info(f"Starting subprocess with commands: {self.commands}")
 
@@ -52,6 +55,9 @@ class SubprocessMonitor:
             universal_newlines=True,
         )
         print(f"Subprocess {self.name} started with PID {self.process.pid}.")
+
+        # =======================================================================
+
         for line in iter(self.process.stdout.readline, ""):
             self.logger.info(line.strip())
             if re.search(self.ready_match, line):
@@ -66,10 +72,19 @@ class SubprocessMonitor:
         if self.finished_callback:
             self.finished_callback()
 
+    #
+    # todo x:
+    #
     def run(self):
         self.ready_event = threading.Event()
         self.ready_line = None
+
+        #
+        # todo x: 执行 _start 函数
+        #
         self.thread = threading.Thread(target=self._start)
+
+        # todo x: 启动
         self.thread.start()
         self.ready_event.wait()
 
