@@ -114,6 +114,10 @@ class Voyager:
         :param ckpt_dir: checkpoint dir
         :param resume: whether to resume from checkpoint
         """
+
+        #
+        # todo x:
+        #
         # init env
         self.env = VoyagerEnv(
             mc_port=mc_port,
@@ -121,6 +125,9 @@ class Voyager:
             server_port=server_port,
             request_timeout=env_request_timeout,
         )
+
+        # =======================================================================
+
         self.env_wait_ticks = env_wait_ticks
         self.reset_placed_if_failed = reset_placed_if_failed
         self.max_iterations = max_iterations

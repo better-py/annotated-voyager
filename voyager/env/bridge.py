@@ -16,12 +16,17 @@ from .process_monitor import SubprocessMonitor
 
 
 class VoyagerEnv(gym.Env):
+    """
+    TODO X: 辅助模块， 用于与 Minecraft 服务器进行交互
+
+    """
+
     def __init__(
             self,
             mc_port=None,
             azure_login=None,
             server_host="http://127.0.0.1",
-            server_port=3000,
+            server_port=3000,  # todo x: mineflayer 服务器端口
             request_timeout=600,
             log_path="./logs",
     ):
@@ -49,7 +54,7 @@ class VoyagerEnv(gym.Env):
         #
         # todo x: 调用 Nodejs， 运行 mineflayer/index.js， 完整路径： voyager/env/mineflayer/index.js
         #
-        self.mineflayer = self.get_mineflayer_process(server_port)
+        self.mineflayer = self.get_mineflayer_process(server_port)  # todo x: mineflayer 服务器端口， 默认 3000
 
         # =======================================================================
 

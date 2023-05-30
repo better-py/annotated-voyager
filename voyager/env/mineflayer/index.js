@@ -15,17 +15,33 @@ const OnSave = require("./lib/observation/onSave");
 const Chests = require("./lib/observation/chests");
 const { plugin: tool } = require("mineflayer-tool");
 
+
+//
+// todo x: 全局定义， 在 /start API 中创建 bot
+//
 let bot = null;
 
+//
+// todo x: 使用 Express 框架（一个 nodejs HTTP Sever 框架）
+//
 const app = express();
 
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: false }));
 
+
+//
+// todo x: 定义一组 HTTP API
+//
 app.post("/start", (req, res) => {
     if (bot) onDisconnect("Restarting bot");
     bot = null;
     console.log(req.body);
+
+
+    //
+    // todo x: 创建 bot
+    //
     bot = mineflayer.createBot({
         host: "localhost", // minecraft server ip
         port: req.body.port, // minecraft server port
