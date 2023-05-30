@@ -8,6 +8,7 @@
 
 ## 主要模块说明：
 
+- ✅️ Voyager 的入口方法：`Voyager.learn()`, 由此依次展开。
 - ✅️ Voyager 项目， 主要分为3部分：
     - ✅️ Python 部分： 代码在 [voyager](voyager) 目录下
     - ✅️ JS 部分： 代码在 [voyager/control_primitives](voyager/control_primitives) 目录下， 定义了一组JS脚本
