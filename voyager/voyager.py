@@ -8,7 +8,7 @@ import voyager.utils as U
 from .env import VoyagerEnv
 
 from .agents import ActionAgent
-from .agents import CriticAgent
+from .agents import CriticAgent     # todo x: 评价 agent, 基于 langchain + chatgpt, 判断 task 是否处理成功
 from .agents import CurriculumAgent
 from .agents import SkillManager
 
@@ -396,6 +396,10 @@ class Voyager:
     # todo x: 核心方法
     #
     def learn(self, reset_env=True):
+        """
+        TODO X: Learn a task
+
+        """
         if self.resume:
             # keep the inventory
             self.env.reset(
@@ -413,6 +417,8 @@ class Voyager:
                 }
             )
             self.resume = True
+
+        # =======================================================================
 
         #
         # todo x: HTTP 请求本地启动的 mineflayer 服务

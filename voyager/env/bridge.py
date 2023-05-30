@@ -173,7 +173,7 @@ class VoyagerEnv(gym.Env):
             raise RuntimeError("Environment has not been reset yet")
 
         self.check_process()  # todo x: 检查进程状态
-        self.unpause()  # todo x: fixme, 内部实现参数，似乎传错了？ 潜在 bug
+        self.unpause()  # todo x: fixme, 内部参数，似乎传错了？ 潜在 bug?
 
         # =======================================================================
 
@@ -198,8 +198,7 @@ class VoyagerEnv(gym.Env):
             raise RuntimeError("Failed to step Minecraft server")
         returned_data = res.json()
 
-        # todo x: 执行暂停操作
-        self.pause()
+        self.pause()         # todo x: 执行暂停操作
         return json.loads(returned_data)
 
     ########################################################################################

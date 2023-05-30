@@ -13,6 +13,11 @@ from langchain.vectorstores import Chroma
 
 
 class CurriculumAgent:
+    """TODO X: 基于 langchain ChatOpenAI 实现
+        - 关于 langchain 详细介绍，请查看 critic.py 中的注释，不在此处重复介绍
+
+    """
+
     def __init__(
             self,
             model_name="gpt-3.5-turbo",
