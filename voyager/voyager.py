@@ -16,37 +16,53 @@ from .agents import SkillManager
 # TODO: remove event memory
 class Voyager:
     def __init__(
-        self,
-        mc_port: int = None,
-        azure_login: Dict[str, str] = None,
-        server_port: int = 3000,
-        openai_api_key: str = None,
-        env_wait_ticks: int = 20,
-        env_request_timeout: int = 600,
-        max_iterations: int = 160,
-        reset_placed_if_failed: bool = False,
-        action_agent_model_name: str = "gpt-4",
-        action_agent_temperature: int = 0,
-        action_agent_task_max_retries: int = 4,
-        action_agent_show_chat_log: bool = True,
-        action_agent_show_execution_error: bool = True,
-        curriculum_agent_model_name: str = "gpt-4",
-        curriculum_agent_temperature: int = 0,
-        curriculum_agent_qa_model_name: str = "gpt-3.5-turbo",
-        curriculum_agent_qa_temperature: int = 0,
-        curriculum_agent_warm_up: Dict[str, int] = None,
-        curriculum_agent_core_inventory_items: str = r".*_log|.*_planks|stick|crafting_table|furnace"
-        r"|cobblestone|dirt|coal|.*_pickaxe|.*_sword|.*_axe",
-        curriculum_agent_mode: str = "auto",
-        critic_agent_model_name: str = "gpt-4",
-        critic_agent_temperature: int = 0,
-        critic_agent_mode: str = "auto",
-        skill_manager_model_name: str = "gpt-3.5-turbo",
-        skill_manager_temperature: int = 0,
-        skill_manager_retrieval_top_k: int = 5,
-        openai_api_request_timeout: int = 240,
-        ckpt_dir: str = "ckpt",
-        resume: bool = False,
+            self,
+            mc_port: int = None,
+            azure_login: Dict[str, str] = None,
+            server_port: int = 3000,
+            openai_api_key: str = None,
+            env_wait_ticks: int = 20,
+            env_request_timeout: int = 600,
+            max_iterations: int = 160,
+            reset_placed_if_failed: bool = False,
+
+            #
+            #
+            #
+            action_agent_model_name: str = "gpt-4",
+            action_agent_temperature: int = 0,
+            action_agent_task_max_retries: int = 4,
+            action_agent_show_chat_log: bool = True,
+            action_agent_show_execution_error: bool = True,
+
+            #
+            #
+            #
+            curriculum_agent_model_name: str = "gpt-4",
+            curriculum_agent_temperature: int = 0,
+            curriculum_agent_qa_model_name: str = "gpt-3.5-turbo",
+            curriculum_agent_qa_temperature: int = 0,
+            curriculum_agent_warm_up: Dict[str, int] = None,
+            curriculum_agent_core_inventory_items: str = r".*_log|.*_planks|stick|crafting_table|furnace"
+                                                         r"|cobblestone|dirt|coal|.*_pickaxe|.*_sword|.*_axe",
+            curriculum_agent_mode: str = "auto",
+
+            #
+            #
+            #
+            critic_agent_model_name: str = "gpt-4",
+            critic_agent_temperature: int = 0,
+            critic_agent_mode: str = "auto",
+
+            #
+            #
+            #
+            skill_manager_model_name: str = "gpt-3.5-turbo",
+            skill_manager_temperature: int = 0,
+            skill_manager_retrieval_top_k: int = 5,
+            openai_api_request_timeout: int = 240,
+            ckpt_dir: str = "ckpt",
+            resume: bool = False,
     ):
         """
         The main class for Voyager.
@@ -112,6 +128,9 @@ class Voyager:
         # set openai api key
         os.environ["OPENAI_API_KEY"] = openai_api_key
 
+        #
+        # todo x:
+        #
         # init agents
         self.action_agent = ActionAgent(
             model_name=action_agent_model_name,
@@ -123,6 +142,10 @@ class Voyager:
             execution_error=action_agent_show_execution_error,
         )
         self.action_agent_task_max_retries = action_agent_task_max_retries
+
+        #
+        # todo x:
+        #
         self.curriculum_agent = CurriculumAgent(
             model_name=curriculum_agent_model_name,
             temperature=curriculum_agent_temperature,
@@ -135,6 +158,10 @@ class Voyager:
             warm_up=curriculum_agent_warm_up,
             core_inventory_items=curriculum_agent_core_inventory_items,
         )
+
+        #
+        #
+        #
         self.critic_agent = CriticAgent(
             model_name=critic_agent_model_name,
             temperature=critic_agent_temperature,
@@ -179,6 +206,10 @@ class Voyager:
             "bot.chat(`/time set ${getNextTime()}`);\n"
             + f"bot.chat('/difficulty {difficulty}');"
         )
+
+        #
+        # todo x:
+        #
         skills = self.skill_manager.retrieve_skills(query=self.context)
         print(
             f"\033[33mRender Action Agent system message with {len(skills)} control_primitives\033[0m"
@@ -198,14 +229,31 @@ class Voyager:
     def close(self):
         self.env.close()
 
+    ########################################################################################
+
+    #
+    # todo x:
+    #
     def step(self):
         if self.action_agent_rollout_num_iter < 0:
             raise ValueError("Agent must be reset before stepping")
+
+        # =======================================================================
+
+        #
+        # todo x:
+        #
         ai_message = self.action_agent.llm(self.messages)
         print(f"\033[34m****Action Agent ai message****\n{ai_message.content}\033[0m")
         self.conversations.append(
             (self.messages[0].content, self.messages[1].content, ai_message.content)
         )
+
+        # =======================================================================
+
+        #
+        # todo x: 导入 JS 模块，调用 JS lib
+        #
         parsed_result = self.action_agent.process_ai_message(message=ai_message)
         success = False
         if isinstance(parsed_result, dict):
@@ -216,6 +264,10 @@ class Voyager:
             )
             self.recorder.record(events, self.task)
             self.action_agent.update_chest_memory(events[-1][1]["nearbyChests"])
+
+            #
+            #
+            #
             success, critique = self.critic_agent.check_task_success(
                 events=events,
                 task=self.task,
@@ -223,6 +275,8 @@ class Voyager:
                 chest_observation=self.action_agent.render_chest_observation(),
                 max_retries=5,
             )
+
+            # =======================================================================
 
             if self.reset_placed_if_failed and not success:
                 # revert all the placing event in the last step
@@ -240,10 +294,16 @@ class Voyager:
                 )
                 events[-1][1]["inventory"] = new_events[-1][1]["inventory"]
                 events[-1][1]["voxels"] = new_events[-1][1]["voxels"]
+
+            # =======================================================================
+
+            #
+            #
+            #
             new_skills = self.skill_manager.retrieve_skills(
                 query=self.context
-                + "\n\n"
-                + self.action_agent.summarize_chatlog(events)
+                      + "\n\n"
+                      + self.action_agent.summarize_chatlog(events)
             )
             system_message = self.action_agent.render_system_message(skills=new_skills)
             human_message = self.action_agent.render_human_message(
@@ -259,19 +319,25 @@ class Voyager:
             assert isinstance(parsed_result, str)
             self.recorder.record([], self.task)
             print(f"\033[34m{parsed_result} Trying again!\033[0m")
+
+        # =======================================================================
+
         assert len(self.messages) == 2
         self.action_agent_rollout_num_iter += 1
         done = (
-            self.action_agent_rollout_num_iter >= self.action_agent_task_max_retries
-            or success
+                self.action_agent_rollout_num_iter >= self.action_agent_task_max_retries
+                or success
         )
         info = {
             "success": success,
             "conversations": self.conversations,
         }
+
+        # =======================================================================
+
         if success:
             assert (
-                "program_code" in parsed_result and "program_name" in parsed_result
+                    "program_code" in parsed_result and "program_name" in parsed_result
             ), "program and program_name must be returned when success"
             info["program_code"] = parsed_result["program_code"]
             info["program_name"] = parsed_result["program_name"]
@@ -281,14 +347,28 @@ class Voyager:
             )
         return self.messages, 0, done, info
 
+    ########################################################################################
+
     def rollout(self, *, task, context, reset_env=True):
+        #
+        #
+        #
         self.reset(task=task, context=context, reset_env=reset_env)
+
+        #
+        # todo x:
+        #
         while True:
             messages, reward, done, info = self.step()
             if done:
                 break
         return messages, reward, done, info
 
+    ########################################################################################
+
+    #
+    # todo x: 核心方法
+    #
     def learn(self, reset_env=True):
         if self.resume:
             # keep the inventory
@@ -309,10 +389,21 @@ class Voyager:
             self.resume = True
         self.last_events = self.env.step("")
 
+        # =======================================================================
+
+        #
+        # todo x: 主逻辑部分
+        #
         while True:
             if self.recorder.iteration > self.max_iterations:
                 print("Iteration limit reached")
                 break
+
+            # =======================================================================
+
+            #
+            # todo x: 处理 task 模式， 自动处理 vs 手动输入
+            #
             task, context = self.curriculum_agent.propose_next_task(
                 events=self.last_events,
                 chest_observation=self.action_agent.render_chest_observation(),
@@ -321,7 +412,13 @@ class Voyager:
             print(
                 f"\033[35mStarting task {task} for at most {self.action_agent_task_max_retries} times\033[0m"
             )
+
+            # =======================================================================
+
             try:
+                #
+                # todo x:
+                #
                 messages, reward, done, info = self.rollout(
                     task=task,
                     context=context,
@@ -346,22 +443,39 @@ class Voyager:
                 print("Your last round rollout terminated due to error:")
                 print(f"\033[41m{e}\033[0m")
             if (
-                task == "Place and deposit useless items into a chest"
-                or task.startswith("Deposit useless items into the chest at")
+                    task == "Place and deposit useless items into a chest"
+                    or task.startswith("Deposit useless items into the chest at")
             ):
                 continue
+
+            # =======================================================================
+
+            #
+            #
+            #
             if info["success"]:
                 print(f"\033[35mCompleted task {task}.\033[0m")
+
+                #
+                # todo x:
+                #
                 self.skill_manager.add_skill(
                     program_name=info["program_name"],
                     program_code=info["program_code"],
                 )
+
+                #
+                #
+                #
                 self.curriculum_agent.completed_tasks.append(task)
             else:
                 self.curriculum_agent.failed_tasks.append(task)
                 print(
                     f"\033[35mFailed to complete task {task}. Skipping to next task.\033[0m"
                 )
+
+            # =======================================================================
+
             # clean up tasks and dump to disk
             self.curriculum_agent.clean_up_tasks()
             print(
@@ -371,6 +485,11 @@ class Voyager:
                 f"\033[35mFailed tasks: {', '.join(self.curriculum_agent.failed_tasks)}\033[0m"
             )
 
+        # =======================================================================
+
+        #
+        #
+        #
         return {
             "completed_tasks": self.curriculum_agent.completed_tasks,
             "failed_tasks": self.curriculum_agent.failed_tasks,
@@ -378,7 +497,7 @@ class Voyager:
         }
 
     def inference(
-        self, task, reset_mode="hard", reset_env=True, early_stop=False, sub_tasks=None
+            self, task, reset_mode="hard", reset_env=True, early_stop=False, sub_tasks=None
     ):
         self.env.reset(
             options={

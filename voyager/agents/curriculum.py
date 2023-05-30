@@ -14,17 +14,17 @@ from langchain.vectorstores import Chroma
 
 class CurriculumAgent:
     def __init__(
-        self,
-        model_name="gpt-3.5-turbo",
-        temperature=0,
-        qa_model_name="gpt-3.5-turbo",
-        qa_temperature=0,
-        request_timout=120,
-        ckpt_dir="ckpt",
-        resume=False,
-        mode="auto",
-        warm_up=None,
-        core_inventory_items: str | None = None,
+            self,
+            model_name="gpt-3.5-turbo",
+            temperature=0,
+            qa_model_name="gpt-3.5-turbo",
+            qa_temperature=0,
+            request_timout=120,
+            ckpt_dir="ckpt",
+            resume=False,
+            mode="auto",
+            warm_up=None,
+            core_inventory_items: str | None = None,
     ):
         self.llm = ChatOpenAI(
             model_name=model_name,
@@ -43,6 +43,9 @@ class CurriculumAgent:
         self.mode = mode
         self.ckpt_dir = ckpt_dir
         U.f_mkdir(f"{ckpt_dir}/curriculum/vectordb")
+
+        # =======================================================================
+
         if resume:
             print(f"\033[35mLoading Curriculum Agent from {ckpt_dir}/curriculum\033[0m")
             self.completed_tasks = U.load_json(
@@ -152,12 +155,12 @@ class CurriculumAgent:
         inventory = event["inventory"]
 
         if not any(
-            "dirt" in block
-            or "log" in block
-            or "grass" in block
-            or "sand" in block
-            or "snow" in block
-            for block in voxels
+                "dirt" in block
+                or "log" in block
+                or "grass" in block
+                or "sand" in block
+                or "snow" in block
+                for block in voxels
         ):
             biome = "underground"
 
@@ -237,6 +240,11 @@ class CurriculumAgent:
         print(f"\033[35m****Curriculum Agent human message****\n{content}\033[0m")
         return HumanMessage(content=content)
 
+    ########################################################################################
+
+    #
+    # todo x:
+    #
     def propose_next_task(self, *, events, chest_observation, max_retries=5):
         if self.progress == 0 and self.mode == "auto":
             task = "Mine 1 wood log"
@@ -266,30 +274,62 @@ class CurriculumAgent:
             ),
         ]
 
+        # =======================================================================
+
         if self.mode == "auto":
+            #
+            # todo x: 自动处理模式
+            #
             return self.propose_next_ai_task(messages=messages, max_retries=max_retries)
         elif self.mode == "manual":
+            #
+            # todo x: 手动输入task 模式
+            #
             return self.propose_next_manual_task()
         else:
             raise ValueError(f"Invalid curriculum agent mode: {self.mode}")
 
+    ########################################################################################
+
+    #
+    # todo x:
+    #
     def propose_next_ai_task(self, *, messages, max_retries=5):
+        #
+        # todo x: 分析 OpenAI 返回内容
+        #
         curriculum = self.llm(messages).content
         print(f"\033[31m****Curriculum Agent ai message****\n{curriculum}\033[0m")
         try:
+            #
+            # todo x:
+            #
             response = self.parse_ai_message(curriculum)
             assert "next_task" in response
+            #
+            # todo x:
+            #
             context = self.get_task_context(response["next_task"])
+            #
+            #
+            #
             return response["next_task"], context
         except Exception as e:
             print(
                 f"\033[35mError parsing curriculum response: {e}. Trying again!\033[0m"
             )
+
+            # todo x: 重试5次
             return self.propose_next_ai_task(
                 messages=messages,
                 max_retries=max_retries - 1,
             )
 
+    ########################################################################################
+
+    #
+    #
+    #
     def parse_ai_message(self, message):
         task = ""
         for line in message.split("\n"):
@@ -298,9 +338,14 @@ class CurriculumAgent:
         assert task, "Task not found in Curriculum Agent response"
         return {"next_task": task}
 
+    #
+    #
+    #
     def propose_next_manual_task(self):
         confirmed = False
         task, context = "", ""
+
+        # todo x: 处理手动输入的 task
         while not confirmed:
             task = input("Enter task: ")
             context = input("Enter context: ")
@@ -379,6 +424,9 @@ class CurriculumAgent:
         assert len(questions_new) == len(questions) == len(answers)
         return questions, answers
 
+    #
+    #
+    #
     def get_task_context(self, task):
         # if include ore in question, gpt will try to use tool with skill touch enhancement to mine
         question = (
@@ -388,6 +436,9 @@ class CurriculumAgent:
         if question in self.qa_cache:
             answer = self.qa_cache[question]
         else:
+            #
+            #
+            #
             answer = self.run_qa_step2_answer_questions(question=question)
             self.qa_cache[question] = answer
             self.qa_cache_questions_vectordb.add_texts(

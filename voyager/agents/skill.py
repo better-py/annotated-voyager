@@ -12,13 +12,13 @@ from voyager.control_primitives import load_control_primitives
 
 class SkillManager:
     def __init__(
-        self,
-        model_name="gpt-3.5-turbo",
-        temperature=0,
-        retrieval_top_k=5,
-        request_timout=120,
-        ckpt_dir="ckpt",
-        resume=False,
+            self,
+            model_name="gpt-3.5-turbo",
+            temperature=0,
+            retrieval_top_k=5,
+            request_timout=120,
+            ckpt_dir="ckpt",
+            resume=False,
     ):
         self.llm = ChatOpenAI(
             model_name=model_name,
@@ -37,6 +37,12 @@ class SkillManager:
             self.skills = {}
         self.retrieval_top_k = retrieval_top_k
         self.ckpt_dir = ckpt_dir
+
+        # =======================================================================
+
+        #
+        # todo x: db 存储方案
+        #
         self.vectordb = Chroma(
             collection_name="skill_vectordb",
             embedding_function=OpenAIEmbeddings(),
@@ -58,11 +64,17 @@ class SkillManager:
             programs += f"{primitives}\n\n"
         return programs
 
+    #
+    #
+    #
     def add_skill(self, program_name, program_code):
         skill_description = self.generate_skill_description(program_name, program_code)
         print(
             f"\033[33mSkill Manager generated description for {program_name}:\n{skill_description}\033[0m"
         )
+
+        # =======================================================================
+
         if program_name in self.skills:
             print(f"\033[33mSkill {program_name} already exists. Rewriting!\033[0m")
             self.vectordb._collection.delete(ids=[program_name])
@@ -72,6 +84,10 @@ class SkillManager:
             dumped_program_name = f"{program_name}V{i}"
         else:
             dumped_program_name = program_name
+
+        # =======================================================================
+
+        # todo x:
         self.vectordb.add_texts(
             texts=[skill_description],
             ids=[program_name],
@@ -92,6 +108,9 @@ class SkillManager:
             f"{self.ckpt_dir}/skill/description/{dumped_program_name}.txt",
         )
         U.dump_json(self.skills, f"{self.ckpt_dir}/skill/skills.json")
+
+        # =======================================================================
+
         self.vectordb.persist()
 
     def generate_skill_description(self, program_name, program_code):
@@ -99,11 +118,11 @@ class SkillManager:
             SystemMessage(content=load_prompt("skill")),
             HumanMessage(
                 content=program_code
-                + "\n\n"
-                + f"The main function is `{program_name}`."
+                        + "\n\n"
+                        + f"The main function is `{program_name}`."
             ),
         ]
-        skill_description = f"    // { self.llm(messages).content}"
+        skill_description = f"    // {self.llm(messages).content}"
         return f"async function {program_name}(bot) {{\n{skill_description}\n}}"
 
     def retrieve_skills(self, query):

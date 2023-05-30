@@ -2,6 +2,10 @@ import re
 import time
 
 import voyager.utils as U
+
+#
+# todo x: 核心外包依赖， 导入 JS 处理
+#
 from javascript import require
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import SystemMessagePromptTemplate
@@ -13,14 +17,14 @@ from voyager.control_primitives_context import load_control_primitives_context
 
 class ActionAgent:
     def __init__(
-        self,
-        model_name="gpt-3.5-turbo",
-        temperature=0,
-        request_timout=120,
-        ckpt_dir="ckpt",
-        resume=False,
-        chat_log=True,
-        execution_error=True,
+            self,
+            model_name="gpt-3.5-turbo",
+            temperature=0,
+            request_timout=120,
+            ckpt_dir="ckpt",
+            resume=False,
+            chat_log=True,
+            execution_error=True,
     ):
         self.ckpt_dir = ckpt_dir
         self.chat_log = chat_log
@@ -94,7 +98,7 @@ class ActionAgent:
         return system_message
 
     def render_human_message(
-        self, *, events, code="", task="", context="", critique=""
+            self, *, events, code="", task="", context="", critique=""
     ):
         chat_messages = []
         error_messages = []
@@ -173,8 +177,8 @@ class ActionAgent:
             observation += f"Inventory ({inventory_used}/36): Empty\n\n"
 
         if not (
-            task == "Place and deposit useless items into a chest"
-            or task.startswith("Deposit useless items into the chest at")
+                task == "Place and deposit useless items into a chest"
+                or task.startswith("Deposit useless items into the chest at")
         ):
             observation += self.render_chest_observation()
 
@@ -192,21 +196,40 @@ class ActionAgent:
 
         return HumanMessage(content=observation)
 
+    #
+    # TODO X: 在 python 中调用 js lib
+    #
     def process_ai_message(self, message):
         assert isinstance(message, AIMessage)
 
         retry = 3
         error = None
+
+        # =======================================================================
+
         while retry > 0:
             try:
+                #
+                # todo x: 执行 JS 处理， require（） 导入 JS 模块
+                #   - https://github.com/extremeheat/JSPyBridge
+                #   - 参考该项目， 具体使用方法
+                #   - 在 python 中， 调用 js lib
+                #
                 babel = require("@babel/core")
                 babel_generator = require("@babel/generator").default
 
                 code_pattern = re.compile(r"```(?:javascript|js)(.*?)```", re.DOTALL)
                 code = "\n".join(code_pattern.findall(message.content))
+
+                #
+                # todo x: 执行 JS 代码
+                #
                 parsed = babel.parse(code)
                 functions = []
                 assert len(list(parsed.program.body)) > 0, "No functions found"
+
+                # =======================================================================
+
                 for i, node in enumerate(parsed.program.body):
                     if node.type != "FunctionDeclaration":
                         continue
@@ -223,6 +246,9 @@ class ActionAgent:
                             "params": list(node["params"]),
                         }
                     )
+
+                # =======================================================================
+
                 # find the last async function
                 main_function = None
                 for function in reversed(functions):
@@ -230,13 +256,20 @@ class ActionAgent:
                         main_function = function
                         break
                 assert (
-                    main_function is not None
+                        main_function is not None
                 ), "No async function found. Your main function must be async."
                 assert (
-                    len(main_function["params"]) == 1
-                    and main_function["params"][0].name == "bot"
+                        len(main_function["params"]) == 1
+                        and main_function["params"][0].name == "bot"
                 ), f"Main function {main_function['name']} must take a single argument named 'bot'"
+
+                # =======================================================================
+
+                #
+                # todo x:
+                #
                 program_code = "\n\n".join(function["body"] for function in functions)
+
                 exec_code = f"await {main_function['name']}(bot);"
                 return {
                     "program_code": program_code,
@@ -247,6 +280,9 @@ class ActionAgent:
                 retry -= 1
                 error = e
                 time.sleep(1)
+
+        # =======================================================================
+
         return f"Error parsing action response (before program execution): {error}"
 
     def summarize_chatlog(self, events):
