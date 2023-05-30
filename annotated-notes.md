@@ -15,6 +15,12 @@
     - ✅️ Nodejs 部分： 代码在 [voyager/env/mineflayer](voyager/env/mineflayer) 目录下， 启动一个 http server, 定义一组
       HTTP API.
 
+> prompts 部分：
+
+- ✅️ [voyager/prompts](voyager/prompts): 存放 `prompts` 
+- ✅️ 该目录下 [\_\_init__.py](voyager/prompts/__init__.py) 中的 `load_prompts()` 方法， 该方法会加载 `prompts` 目录下的所有 `prompts` 文件。
+- ✅️ 跟踪 `load_prompts()` 的引用链， 就可以找到 `prompts` 使用方法。
+
 ### Python 部分核心依赖包：
 
 1. langchain/openai/tiktoken: GPT 相关
@@ -31,6 +37,7 @@
 
 - ✅️ voyager/env/mineflayer： 这里基于 `nodejs + express`, 定义了一个本地的 http server，定义的一组 HTTP API，
 - ✅️ Python 代码部分，在执行 task 时， 调用的本地 HTTP API，就对应这里.
+
 
 
 ## 核心依赖库：
@@ -63,7 +70,7 @@
     - 默认 HTTP server： `http://localhost:3000`， 端口： `3000`
 - ✅️ 此模块，内部定义了一组 HTTP API：
     - `/start`: 调用此API， 启动一个 `bot`
-    - `/step`: 核心功能方法， 🔥️🔥️🔥️
+    - `/step`: 核心功能方法, 注意内部的 `bot` 调用流程， 🔥️🔥️🔥️
     - `/stop`
     - `/pause`
 - ✅️ 这组 API， 也是上述 python 代码调用中，使用的。

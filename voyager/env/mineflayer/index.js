@@ -39,6 +39,8 @@ app.post("/start", (req, res) => {
     console.log(req.body);
 
 
+    //////////////////////////////////////////////////////////////////////
+
     //
     // todo x: 创建 bot
     //
@@ -49,6 +51,9 @@ app.post("/start", (req, res) => {
         disableChatSigning: true,
         checkTimeoutInterval: 60 * 60 * 1000,
     });
+
+    //////////////////////////////////////////////////////////////////////
+
     bot.once("error", onConnectionFailed);
 
     // Event subscriptions
@@ -64,6 +69,8 @@ app.post("/start", (req, res) => {
     bot.on("mount", () => {
         bot.dismount();
     });
+
+    //////////////////////////////////////////////////////////////////////
 
     bot.once("spawn", async () => {
         bot.removeListener("error", onConnectionFailed);
@@ -98,6 +105,8 @@ app.post("/start", (req, res) => {
             }
         }
 
+        //////////////////////////////////////////////////////////////////////
+
         if (req.body.position) {
             bot.chat(
                 `/tp @s ${req.body.position.x} ${req.body.position.y} ${req.body.position.z}`
@@ -111,11 +120,17 @@ app.post("/start", (req, res) => {
             bot.iron_pickaxe = true;
         }
 
+        //////////////////////////////////////////////////////////////////////
+
         const { pathfinder } = require("mineflayer-pathfinder");
         const tool = require("mineflayer-tool").plugin;
         const collectBlock = require("mineflayer-collectblock").plugin;
         const pvp = require("mineflayer-pvp").plugin;
         const minecraftHawkEye = require("minecrafthawkeye");
+
+        //
+        // todo x: bot 插件
+        //
         bot.loadPlugin(pathfinder);
         bot.loadPlugin(tool);
         bot.loadPlugin(collectBlock);
@@ -125,6 +140,11 @@ app.post("/start", (req, res) => {
         // bot.collectBlock.movements.digCost = 0;
         // bot.collectBlock.movements.placeCost = 0;
 
+        //////////////////////////////////////////////////////////////////////
+
+        //
+        // todo x:
+        //
         obs.inject(bot, [
             OnChat,
             OnError,
@@ -135,7 +155,15 @@ app.post("/start", (req, res) => {
             Chests,
             BlockRecords,
         ]);
+
+        //////////////////////////////////////////////////////////////////////
+
+        //
+        // todo x
+        //
         skills.inject(bot);
+
+        //////////////////////////////////////////////////////////////////////
 
         if (req.body.spread) {
             bot.chat(`/spreadplayers ~ ~ 0 300 under 80 false @s`);
@@ -149,6 +177,8 @@ app.post("/start", (req, res) => {
         bot.chat("/gamerule keepInventory true");
         bot.chat("/gamerule doDaylightCycle false");
     });
+
+    //////////////////////////////////////////////////////////////////////
 
     function onConnectionFailed(e) {
         console.log(e);
@@ -165,6 +195,13 @@ app.post("/start", (req, res) => {
     }
 });
 
+
+//////////////////////////////////////////////////////////////////////
+
+
+//
+// todo x: 核心接口， python 逻辑中， 通过 http post 调用此接口
+//
 app.post("/step", async (req, res) => {
     // import useful package
     let response_sent = false;
@@ -190,6 +227,9 @@ app.post("/step", async (req, res) => {
     mcData.itemsByName["leather_boots"] = mcData.itemsByName["leather_boots"];
     mcData.itemsByName["lapis_lazuli_ore"] = mcData.itemsByName["lapis_ore"];
     mcData.blocksByName["lapis_lazuli_ore"] = mcData.blocksByName["lapis_ore"];
+
+    //////////////////////////////////////////////////////////////////////
+
     const {
         Movements,
         goals: {
@@ -252,11 +292,22 @@ app.post("/step", async (req, res) => {
     const programs = req.body.programs;
     bot.cumulativeObs = [];
     await bot.waitForTicks(bot.waitTicks);
+
+
+    //////////////////////////////////////////////////////////////////////
+
+
+    //
+    // todo x: 执行从 python 传来的代码
+    //
     const r = await evaluateCode(code, programs);
     process.off("uncaughtException", otherError);
     if (r !== "success") {
         bot.emit("error", handleError(r));
     }
+
+    //////////////////////////////////////////////////////////////////////
+
     await returnItems();
     // wait for last message
     await bot.waitForTicks(bot.waitTicks);
@@ -266,6 +317,11 @@ app.post("/step", async (req, res) => {
     }
     bot.removeListener("physicTick", onTick);
 
+    //////////////////////////////////////////////////////////////////////
+
+    //
+    // todo x: 执行从 python 传来的代码
+    //
     async function evaluateCode(code, programs) {
         // Echo the code produced for players to see it. Don't echo when the bot code is already producing dialog or it will double echo
         try {
@@ -275,6 +331,8 @@ app.post("/step", async (req, res) => {
             return err;
         }
     }
+
+    //////////////////////////////////////////////////////////////////////
 
     function onStuck(posThreshold) {
         const currentPos = bot.entity.position;

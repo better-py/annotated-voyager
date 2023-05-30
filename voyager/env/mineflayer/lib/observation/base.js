@@ -17,6 +17,11 @@ class Observation {
     reset() {}
 }
 
+//////////////////////////////////////////////////////////////////////
+
+//
+// todo x:
+//
 function inject(bot, obs_list) {
     bot.obsList = [];
     bot.cumulativeObs = [];

@@ -139,7 +139,8 @@ class VoyagerEnv(gym.Env):
             # =======================================================================
 
             #
-            # todo x: 发送请求
+            # todo x: 发送请求到本地启动的 mineflayer 服务
+            #   - 启动路径：voyager/env/mineflayer/index.js
             #
             res = requests.post(
                 f"{self.server}/start",
@@ -170,7 +171,7 @@ class VoyagerEnv(gym.Env):
         # =======================================================================
 
         #
-        # todo x: 远程执行 js 代码
+        # todo x: http post 执行 js 代码， call 本地的 mineflayer 服务
         #
         data = {
             "code": code,  # todo x: js 代码
@@ -180,7 +181,8 @@ class VoyagerEnv(gym.Env):
         # =======================================================================
 
         #
-        # todo x: 发送HTTP请求， 执行 step 操作
+        # todo x: http call 本地的 mineflayer 服务， 执行 step 操作
+        #   - 查看 API 实现: `voyager/env/mineflayer/index.js` 中的 `/step` 定义
         #
         res = requests.post(
             f"{self.server}/step", json=data, timeout=self.request_timeout
@@ -236,7 +238,7 @@ class VoyagerEnv(gym.Env):
     def close(self):
         self.unpause()
         if self.connected:
-            res = requests.post(f"{self.server}/stop")  # todo x: 执行关闭操作
+            res = requests.post(f"{self.server}/stop")  # todo x: call 本地的 mineflayer 服务, 执行关闭操作
             if res.status_code == 200:
                 self.connected = False
         if self.mc_instance:
@@ -246,14 +248,14 @@ class VoyagerEnv(gym.Env):
 
     def pause(self):
         if self.mineflayer.is_running and not self.server_paused:
-            res = requests.post(f"{self.server}/pause")  # todo x: 执行暂停操作
+            res = requests.post(f"{self.server}/pause")  # todo x: call 本地的 mineflayer 服务, 执行暂停操作
             if res.status_code == 200:
                 self.server_paused = True
         return self.server_paused
 
     def unpause(self):
         if self.mineflayer.is_running and self.server_paused:
-            res = requests.post(f"{self.server}/pause")  # todo x: 执行取消暂停操作， 这里似乎有个 bug !!!， 参数传错了: unpause
+            res = requests.post(f"{self.server}/pause")  # todo x: call 本地的 mineflayer 服务， 这里似乎有 bug!!!， 参数传错了: unpause
             if res.status_code == 200:
                 self.server_paused = False
             else:

@@ -1,3 +1,7 @@
+
+//
+// todo x:
+//
 function inject(bot) {
     bot._sleep = bot.sleep;
     bot.sleep = async (bedBlock) => {
@@ -5,6 +9,8 @@ function inject(bot) {
         await bot._sleep(bedBlock);
         await bot.waitForTicks(135);
     };
+
+    //////////////////////////////////////////////////////////////////////
 
     bot._fish = bot.fish;
     bot.fish = async () => {
@@ -31,12 +37,16 @@ function inject(bot) {
         await bot.waitForTicks(20);
     };
 
+    //////////////////////////////////////////////////////////////////////
+
     bot._consume = bot.consume;
     bot.consume = async () => {
         // action_count.activateItem++;
         await bot._consume();
         await bot.waitForTicks(20);
     };
+
+    //////////////////////////////////////////////////////////////////////
 
     bot._useOn = bot.useOn;
     bot.useOn = async (entity) => {
@@ -48,6 +58,8 @@ function inject(bot) {
         await bot.waitForTicks(20);
     };
 
+    //////////////////////////////////////////////////////////////////////
+
     bot._activateBlock = bot.activateBlock;
     bot.activateBlock = async (block) => {
         if (block.position.distanceTo(bot.entity.position) > 6) {
@@ -58,9 +70,16 @@ function inject(bot) {
         await bot._activateBlock(block);
     };
 
+    //////////////////////////////////////////////////////////////////////
+
     bot._chat = bot.chat;
+
     bot.chat = (message) => {
         // action_count.chat++;
+
+        //
+        // todo x: chat
+        //
         bot.emit("chatEvent", "bot", message);
         bot._chat(message);
     };
@@ -76,4 +95,4 @@ function inject(bot) {
 }
 
 // export all control_primitives
-module.exports = { inject };
+module.exports = {inject};
