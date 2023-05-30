@@ -33,10 +33,10 @@ class MinecraftInstance:
             except Exception as e:
                 print(e)
 
-        self.mc_command = self.get_mc_command()
+        self.mc_command = self.get_mc_command()  # todo x: 获取启动 minecraft 的命令
 
         #
-        #
+        # todo x: 启动 minecraft 服务器
         #
         self.mc_process = SubprocessMonitor(
             commands=self.mc_command,
@@ -51,6 +51,10 @@ class MinecraftInstance:
     def get_mineflayer_process(self, server_port):
         U.f_mkdir(self.log_path, "../mineflayer")
         file_path = os.path.abspath(os.path.dirname(__file__))
+
+        #
+        # todo x: 调用 Nodejs， 运行 mineflayer/index.js
+        #
         return SubprocessMonitor(
             commands=[
                 "node",
@@ -63,7 +67,7 @@ class MinecraftInstance:
         )
 
     #
-    #
+    # todo x: 获取启动 minecraft 的命令
     #
     def get_mc_command(self):
         file_path = os.path.abspath(os.path.dirname(__file__))
@@ -123,7 +127,7 @@ class MinecraftInstance:
         # =======================================================================
 
         #
-        # todo x: 生成 minecraft 命令
+        # todo x: 获取启动 minecraft 的命令
         #
         mc_command = minecraft_launcher_lib.command.get_minecraft_command(
             self.version, self.mc_dir, options
@@ -133,7 +137,7 @@ class MinecraftInstance:
 
     def run(self):
         #
-        #
+        # todo x: 启动 mc 服务器
         #
         self.mc_process.run()
 

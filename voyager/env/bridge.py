@@ -18,6 +18,11 @@ from .process_monitor import SubprocessMonitor
 class VoyagerEnv(gym.Env):
     """
     TODO X: 辅助模块， 用于与 Minecraft 服务器进行交互
+        - 注意基类 gym.Env
+        - https://github.com/Farama-Foundation/Gymnasium
+            - openAI Gym 的 fork 分支，官方不维护了。
+            - 功能是： 强化学习算法相关
+        - 核心方法是 step()方法
 
     """
 
@@ -96,7 +101,7 @@ class VoyagerEnv(gym.Env):
         U.f_mkdir(self.log_path, "minecraft")
         return MinecraftInstance(
             **self.azure_login,
-            mineflayer=self.mineflayer,
+            mineflayer=self.mineflayer, # todo x: 注意参数
             log_path=U.f_join(self.log_path, "minecraft"),
         )
 

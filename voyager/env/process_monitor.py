@@ -48,6 +48,9 @@ class SubprocessMonitor:
     def _start(self):
         self.logger.info(f"Starting subprocess with commands: {self.commands}")
 
+        #
+        # todo x: 执行命令, run nodejs + cmd, 启动 mineflayer
+        #
         self.process = psutil.Popen(
             self.commands,
             stdout=subprocess.PIPE,
@@ -80,7 +83,7 @@ class SubprocessMonitor:
         self.ready_line = None
 
         #
-        # todo x: 执行 _start 函数
+        # todo x: 执行 _start 函数， call nodejs 启动 mineflayer
         #
         self.thread = threading.Thread(target=self._start)
 
