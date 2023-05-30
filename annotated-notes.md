@@ -6,6 +6,32 @@
 
 ![](./images/note-1.png)
 
+## 主要模块说明：
+
+- ✅️ Voyager 项目， 主要分为3部分：
+    - ✅️ Python 部分： 代码在 [voyager](voyager) 目录下
+    - ✅️ JS 部分： 代码在 [voyager/control_primitives](voyager/control_primitives) 目录下， 定义了一组JS脚本
+    - ✅️ Nodejs 部分： 代码在 [voyager/env/mineflayer](voyager/env/mineflayer) 目录下， 启动一个 http server, 定义一组
+      HTTP API.
+
+### Python 部分核心依赖包：
+
+1. langchain/openai/tiktoken: GPT 相关
+2. javascript： 这个包比较有意思， 实现在 python 中调用 js lib。（我笔记有注解）
+3. chromadb： 向量数据库，存储 task 中间步
+4. minecraft_launcher_lib： minecraft 服务器登录 + 拼接 minecraft 指令
+
+### JS 脚本：
+
+- ✅️ voyager/control_primitives： 这目录有写了一组 minecraft bot 指令脚本
+
+### Nodejs 服务：
+
+
+- ✅️ voyager/env/mineflayer： 这里基于 `nodejs + express`, 定义了一个本地的 http server，定义的一组 HTTP API，
+- ✅️ Python 代码部分，在执行 task 时， 调用的本地 HTTP API，就对应这里.
+
+
 ## 核心依赖库：
 
 - ✅️ [javascript](https://pypi.org/project/javascript/)
