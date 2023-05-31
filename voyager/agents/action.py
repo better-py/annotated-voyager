@@ -35,6 +35,10 @@ class ActionAgent:
             self.chest_memory = U.load_json(f"{ckpt_dir}/action/chest_memory.json")
         else:
             self.chest_memory = {}
+
+        #
+        # todo x: 基于 langchain + ChatGPT 创建的 LLM 模型 agent
+        #
         self.llm = ChatOpenAI(
             model_name=model_name,
             temperature=temperature,

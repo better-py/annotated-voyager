@@ -20,6 +20,9 @@ class SkillManager:
             ckpt_dir="ckpt",
             resume=False,
     ):
+        #
+        # todo x: 基于 langchain + ChatGPT 创建的 LLM 模型 agent
+        #
         self.llm = ChatOpenAI(
             model_name=model_name,
             temperature=temperature,

@@ -14,7 +14,7 @@ from langchain.vectorstores import Chroma
 
 class CurriculumAgent:
     """TODO X: 基于 langchain ChatOpenAI 实现
-        - 关于 langchain 详细介绍，请查看 critic.py 中的注释，不在此处重复介绍
+        - 关于 langchain 详细介绍，请查看 `critic.py` 中的注释，不在此处重复
 
     """
 
@@ -248,7 +248,7 @@ class CurriculumAgent:
     ########################################################################################
 
     #
-    # todo x:
+    # todo x: 生成建议执行的下一个 task， 2种生成模式（手动 vs AI 自动）
     #
     def propose_next_task(self, *, events, chest_observation, max_retries=5):
         if self.progress == 0 and self.mode == "auto":
@@ -283,12 +283,12 @@ class CurriculumAgent:
 
         if self.mode == "auto":
             #
-            # todo x: 自动处理模式
+            # todo x: AI 自动生成新 task 模式，从 AI 回答中提取 next_task
             #
             return self.propose_next_ai_task(messages=messages, max_retries=max_retries)
         elif self.mode == "manual":
             #
-            # todo x: 手动输入task 模式
+            # todo x: 命令行手动输入 task 模式
             #
             return self.propose_next_manual_task()
         else:
@@ -297,27 +297,25 @@ class CurriculumAgent:
     ########################################################################################
 
     #
-    # todo x:
+    # todo x: 调用 OpenAI(GPT), 让 AI 生成 next_task
     #
     def propose_next_ai_task(self, *, messages, max_retries=5):
         #
-        # todo x: 分析 OpenAI 返回内容
+        # todo x: call OpenAI(GPT), 获得 AI 回答内容
+        #  - 基于 langchain + OpenAI 创建 LLM 代理，调用后，返回内容
         #
         curriculum = self.llm(messages).content
         print(f"\033[31m****Curriculum Agent ai message****\n{curriculum}\033[0m")
+
+        # =======================================================================
+
         try:
-            #
-            # todo x:
-            #
-            response = self.parse_ai_message(curriculum)
+            response = self.parse_ai_message(curriculum)  # todo x: 解析 AI 回答，提取 next_task
             assert "next_task" in response
             #
-            # todo x:
-            #
-            context = self.get_task_context(response["next_task"])
             #
             #
-            #
+            context = self.get_task_context(response["next_task"])  # todo x: 处理上下文， 关键步骤
             return response["next_task"], context
         except Exception as e:
             print(
@@ -344,7 +342,7 @@ class CurriculumAgent:
         return {"next_task": task}
 
     #
-    #
+    # todo x: 命令行手动输入 task + context， 构造下一次执行的 task
     #
     def propose_next_manual_task(self):
         confirmed = False

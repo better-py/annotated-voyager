@@ -8,8 +8,8 @@ import voyager.utils as U
 from .env import VoyagerEnv
 
 from .agents import ActionAgent
-from .agents import CriticAgent     # todo x: 评价 agent, 基于 langchain + chatgpt, 判断 task 是否处理成功
-from .agents import CurriculumAgent
+from .agents import CriticAgent  # todo x: 评价 agent, 基于 langchain + chatgpt, 判断 task 是否处理成功
+from .agents import CurriculumAgent  # todo x: 基于 langchain + chatgpt，主要用于生成新task（基于 AI 回答）
 from .agents import SkillManager
 
 
@@ -136,7 +136,7 @@ class Voyager:
         os.environ["OPENAI_API_KEY"] = openai_api_key
 
         #
-        # todo x:
+        # todo x: 基于 langchain + ChatGPT 创建的 LLM 模型 agent
         #
         # init agents
         self.action_agent = ActionAgent(
@@ -151,7 +151,7 @@ class Voyager:
         self.action_agent_task_max_retries = action_agent_task_max_retries
 
         #
-        # todo x:
+        # todo x: 基于 langchain + ChatGPT 创建的 LLM 模型 agent
         #
         self.curriculum_agent = CurriculumAgent(
             model_name=curriculum_agent_model_name,
@@ -167,7 +167,7 @@ class Voyager:
         )
 
         #
-        #
+        # todo x:  基于 langchain + ChatGPT 创建的 LLM 模型 agent
         #
         self.critic_agent = CriticAgent(
             model_name=critic_agent_model_name,
@@ -175,6 +175,10 @@ class Voyager:
             request_timout=openai_api_request_timeout,
             mode=critic_agent_mode,
         )
+
+        #
+        # todo x: 基于 langchain + ChatGPT 创建的 LLM 模型 agent
+        #
         self.skill_manager = SkillManager(
             model_name=skill_manager_model_name,
             temperature=skill_manager_temperature,
@@ -189,7 +193,7 @@ class Voyager:
         # init variables for rollout
         self.action_agent_rollout_num_iter = -1
         self.task = None
-        self.context = ""
+        self.context = ""  # todo x: 上下文，在 .reset() 中更新
         self.messages = None
         self.conversations = []
         self.last_events = None
@@ -197,7 +201,11 @@ class Voyager:
     def reset(self, task, context="", reset_env=True):
         self.action_agent_rollout_num_iter = 0
         self.task = task
-        self.context = context
+
+        #
+        #
+        #
+        self.context = context  # todo x: 注意上下文的更新+使用链
         if reset_env:
             self.env.reset(
                 options={
@@ -252,7 +260,7 @@ class Voyager:
         # =======================================================================
 
         #
-        # todo x:
+        # todo x: call OpenAI(GPT)
         #
         ai_message = self.action_agent.llm(self.messages)
         print(f"\033[34m****Action Agent ai message****\n{ai_message.content}\033[0m")
@@ -286,7 +294,7 @@ class Voyager:
             self.action_agent.update_chest_memory(events[-1][1]["nearbyChests"])
 
             #
-            #
+            # todo x: call OpenAI(GPT), 根据 AI(GPT) 回答，自动判断 task 是否完成
             #
             success, critique = self.critic_agent.check_task_success(
                 events=events,
@@ -379,7 +387,7 @@ class Voyager:
         #
         #
         #
-        self.reset(task=task, context=context, reset_env=reset_env)
+        self.reset(task=task, context=context, reset_env=reset_env)  # todo x: 注意更新上下文值
 
         #
         # todo x:
@@ -439,6 +447,7 @@ class Voyager:
 
             #
             # todo x: 处理 task 模式， 自动处理 vs 手动输入
+            #   - 注意此处的 context 值，后续传递链
             #
             task, context = self.curriculum_agent.propose_next_task(
                 events=self.last_events,

@@ -116,7 +116,7 @@ class CriticAgent:
         return success, critique
 
     #
-    # todo x:
+    # todo x: LLM 模型，调用 OpenAI(GPT)，解析 AI 回答, 判断 task 是否成功
     #
     def ai_check_task_success(self, messages, max_retries=5):
         if max_retries == 0:
@@ -131,7 +131,7 @@ class CriticAgent:
         # =======================================================================
 
         #
-        # todo x: LLM， call OpenAI, 返回一个回答, 解析该回答中的关键词，判断 task 是否成功
+        # todo x: LLM， call OpenAI, 返回 AI 回答, 解析该回答中的关键词，判断 task 是否成功
         #
         critic = self.llm(messages).content
 
@@ -173,7 +173,7 @@ class CriticAgent:
             return self.human_check_task_success()  # todo x: 人工确认
         elif self.mode == "auto":
             #
-            #
+            #  todo x: LLM 模型，调用 OpenAI(GPT)，解析 AI 回答, 判断 task 是否成功
             #
             return self.ai_check_task_success(
                 messages=messages, max_retries=max_retries
