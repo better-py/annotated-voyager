@@ -1,10 +1,27 @@
 # voyager 源码分析笔记：
 
-## 注解说明：
+## 阅读提示：
 
 - ✅️ `# todo x`： 为注解标识符， 方便利用 IDE 的 TODO 工具，快速筛查注解点。
+- ✅️ 源码文件，`核心链路和功能`， 都做了`详细注解`，注解`越多`越重要，注意抓重点。
+- ❎️ `未注解`的代码，通常都可以`忽略+跳过不看`（不重要+不影响理解）。
+- ✅️ 建议从 [voyager/voyager.py](voyager/voyager.py) 的 `learn()` 方法，读起。
 
 ![](./images/note-1.png)
+
+## 补充知识：
+
+### MineCraft 游戏相关：
+
+- ✅️ [MineCraft](https://www.minecraft.net/) 是个沙盒游戏，玩家可以自由创造和破坏各种方块，探索和冒险。
+- ✅️ [MineCraft](https://www.minecraft.net/) 游戏，有两种模式：`创造模式` 和 `生存模式`。
+- ✅️ 已被`微软`收购，所以代码中的`帐号登录` 是`微软`的帐号登录。
+
+> minecraft 游戏， 补充 Commands 和 Cheats 说明：
+
+- ✅️ https://www.ign.com/wikis/minecraft/All_Minecraft_Commands_and_Cheats
+- ✅️ 项目源码 [voyager/env/mineflayer/index.js](voyager/env/mineflayer/index.js) 涉及使用的 minecraft 指令，
+  可以在上面的链接中查找到。
 
 ## 主要模块说明：
 
@@ -17,8 +34,9 @@
 
 > prompts 部分：
 
-- ✅️ [voyager/prompts](voyager/prompts): 存放 `prompts` 
-- ✅️ 该目录下 [\_\_init__.py](voyager/prompts/__init__.py) 中的 `load_prompts()` 方法， 该方法会加载 `prompts` 目录下的所有 `prompts` 文件。
+- ✅️ [voyager/prompts](voyager/prompts): 存放 `prompts`
+- ✅️ 该目录下 [\_\_init__.py](voyager/prompts/__init__.py) 中的 `load_prompts()` 方法， 该方法会加载 `prompts`
+  目录下的所有 `prompts` 文件。
 - ✅️ 跟踪 `load_prompts()` 的引用链， 就可以找到 `prompts` 使用方法。
 
 ### Python 部分核心依赖包：
@@ -34,11 +52,8 @@
 
 ### Nodejs 服务：
 
-
 - ✅️ voyager/env/mineflayer： 这里基于 `nodejs + express`, 定义了一个本地的 http server，定义的一组 HTTP API，
 - ✅️ Python 代码部分，在执行 task 时， 调用的本地 HTTP API，就对应这里.
-
-
 
 ## 核心依赖库：
 

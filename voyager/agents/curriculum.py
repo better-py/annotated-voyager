@@ -31,11 +31,17 @@ class CurriculumAgent:
             warm_up=None,
             core_inventory_items: str | None = None,
     ):
+        #
+        # TODO X: 基于 langchain + ChatOpenAI， 创建一个 LLM 模型对象，
+        #
         self.llm = ChatOpenAI(
             model_name=model_name,
             temperature=temperature,
             request_timeout=request_timout,
         )
+        #
+        # TODO X: 基于 langchain + ChatOpenAI， 创建一个 LLM 模型对象，
+        #
         self.qa_llm = ChatOpenAI(
             model_name=qa_model_name,
             temperature=qa_temperature,
@@ -62,6 +68,12 @@ class CurriculumAgent:
             self.completed_tasks = []
             self.failed_tasks = []
             self.qa_cache = {}
+
+        # =======================================================================
+
+        #
+        # todo x: 向量数据库
+        #
         # vectordb for qa cache
         self.qa_cache_questions_vectordb = Chroma(
             collection_name="qa_cache_questions_vectordb",
