@@ -9,7 +9,7 @@ from voyager.utils.json_utils import fix_and_parse_json
 from langchain.chat_models import ChatOpenAI
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.schema import HumanMessage, SystemMessage
-from langchain.vectorstores import Chroma
+from langchain.vectorstores import Chroma  # todo x: 向量数据库, 可以顺便查看 langchain 支持了哪些向量数据库
 
 
 class CurriculumAgent:
