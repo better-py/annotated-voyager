@@ -135,6 +135,8 @@ class Voyager:
         # set openai api key
         os.environ["OPENAI_API_KEY"] = openai_api_key
 
+        # =======================================================================
+
         #
         # todo x: 基于 langchain + ChatGPT 创建的 LLM 模型 agent
         #
@@ -149,6 +151,8 @@ class Voyager:
             execution_error=action_agent_show_execution_error,
         )
         self.action_agent_task_max_retries = action_agent_task_max_retries
+
+        # =======================================================================
 
         #
         # todo x: 基于 langchain + ChatGPT 创建的 LLM 模型 agent
@@ -166,6 +170,8 @@ class Voyager:
             core_inventory_items=curriculum_agent_core_inventory_items,
         )
 
+        # =======================================================================
+
         #
         # todo x:  基于 langchain + ChatGPT 创建的 LLM 模型 agent
         #
@@ -175,6 +181,8 @@ class Voyager:
             request_timout=openai_api_request_timeout,
             mode=critic_agent_mode,
         )
+
+        # =======================================================================
 
         #
         # todo x: 基于 langchain + ChatGPT 创建的 LLM 模型 agent
@@ -194,11 +202,20 @@ class Voyager:
         self.action_agent_rollout_num_iter = -1
         self.task = None
         self.context = ""  # todo x: 上下文，在 .reset() 中更新
-        self.messages = None
+
+        # =======================================================================
+
+        #
+        #
+        #
+        self.messages = None  # todo x: 糟糕的使用方式！共享变量: 隐式赋值(self.reset()方法) + 隐式调用(self.step()方法）.
         self.conversations = []
         self.last_events = None
 
     def reset(self, task, context="", reset_env=True):
+        """todo x: 跟踪 task 和 context 流转链路
+
+        """
         self.action_agent_rollout_num_iter = 0
         self.task = task
 
@@ -207,6 +224,9 @@ class Voyager:
         #
         self.context = context  # todo x: 注意上下文的更新+使用链
         if reset_env:
+            #
+            #
+            #
             self.env.reset(
                 options={
                     "mode": "soft",
@@ -217,8 +237,10 @@ class Voyager:
             "easy" if len(self.curriculum_agent.completed_tasks) > 15 else "peaceful"
         )
 
+        # =======================================================================
+
         #
-        # todo x: HTTP 请求本地启动的 mineflayer 服务
+        # todo x: 🔥️🔥️🔥️ HTTP 请求本地启动的 mineflayer 服务
         #
         # step to peek an observation
         events = self.env.step(
@@ -226,18 +248,31 @@ class Voyager:
             + f"bot.chat('/difficulty {difficulty}');"
         )
 
+        # =======================================================================
+
         #
-        # todo x:
+        # todo x: 传入 context, 检索向量数据库, 尝试复用已存在技能
         #
         skills = self.skill_manager.retrieve_skills(query=self.context)
         print(
             f"\033[33mRender Action Agent system message with {len(skills)} control_primitives\033[0m"
         )
-        system_message = self.action_agent.render_system_message(skills=skills)
+
+        # =======================================================================
+
+        #
+        # todo x: 根据 skills, 让 GPT 写代码, 执行控制动作
+        #
+        system_message = self.action_agent.render_system_message(skills=skills)  # todo x: 让GPT自己写代码，实现控制功能
         human_message = self.action_agent.render_human_message(
             events=events, code="", task=self.task, context=context, critique=""
         )
-        self.messages = [system_message, human_message]
+
+        #
+        # todo x: 比较糟糕的用法, 使用 self.messages 作内部数据共享。（跟踪此变量的调用处， 隐式操作）
+        #   - 注意， 此时 GPT 生成的代码，还未被执行。 具体在 self.step() 中执行的。（非常隐晦）
+        #
+        self.messages = [system_message, human_message]  # todo x: 糟糕的初始化方式！隐式被 self.step() 使用
         print(
             f"\033[32m****Action Agent human message****\n{human_message.content}\033[0m"
         )
@@ -254,15 +289,20 @@ class Voyager:
     # todo x:
     #
     def step(self):
+        """todo x: 🔥️🔥️🔥️🔥🔥️ 核心方法！
+
+        """
         if self.action_agent_rollout_num_iter < 0:
             raise ValueError("Agent must be reset before stepping")
 
         # =======================================================================
 
         #
-        # todo x: call OpenAI(GPT)
+        # todo x: 🔥️🔥️🔥️🔥🔥️ call OpenAI(GPT)
+        #   - 此处使用的 self.messages, 是在 self.reset() 中初始化的
+        #   - 这里的 messages，内容是 由 GPT 自己生成的代码（待被执行）
         #
-        ai_message = self.action_agent.llm(self.messages)
+        ai_message = self.action_agent.llm(self.messages)  # todo x: 此处 self.messages, 是隐式由
         print(f"\033[34m****Action Agent ai message****\n{ai_message.content}\033[0m")
         self.conversations.append(
             (self.messages[0].content, self.messages[1].content, ai_message.content)
@@ -271,9 +311,10 @@ class Voyager:
         # =======================================================================
 
         #
-        # todo x: 导入 JS 模块，调用 JS lib
+        # todo x: 🔥️🔥️🔥️🔥️ 导入 JS 模块，调用 JS lib
         #
         parsed_result = self.action_agent.process_ai_message(message=ai_message)
+
         success = False
         if isinstance(parsed_result, dict):
             code = parsed_result["program_code"] + "\n" + parsed_result["exec_code"]
@@ -332,14 +373,20 @@ class Voyager:
             # =======================================================================
 
             #
-            #
+            # todo x: 检索向量数据库, 尝试复用已存在技能
             #
             new_skills = self.skill_manager.retrieve_skills(
                 query=self.context
                       + "\n\n"
                       + self.action_agent.summarize_chatlog(events)
             )
-            system_message = self.action_agent.render_system_message(skills=new_skills)
+
+            # =======================================================================
+
+            #
+            #
+            #
+            system_message = self.action_agent.render_system_message(skills=new_skills)  # todo x: GPT 自己写代码，实现控制逻辑
             human_message = self.action_agent.render_human_message(
                 events=events,
                 code=parsed_result["program_code"],
@@ -384,6 +431,10 @@ class Voyager:
     ########################################################################################
 
     def rollout(self, *, task, context, reset_env=True):
+        """todo x: 传入具体任务（task）和上下文（context）, 执行核心逻辑
+            - 注意 task 的流转链路
+
+        """
         #
         #
         #
@@ -393,7 +444,7 @@ class Voyager:
         # todo x:
         #
         while True:
-            messages, reward, done, info = self.step()
+            messages, reward, done, info = self.step()  # todo x: 核心操作， AI(GPT) + JS
             if done:
                 break
         return messages, reward, done, info
@@ -462,7 +513,7 @@ class Voyager:
 
             try:
                 #
-                # todo x:
+                # todo x: 传入具体任务（task）和上下文（context）, 执行核心逻辑
                 #
                 messages, reward, done, info = self.rollout(
                     task=task,
@@ -558,15 +609,23 @@ class Voyager:
         #
         self.last_events = self.env.step("")
         if not sub_tasks:
-            sub_tasks = self.curriculum_agent.decompose_task(task, self.last_events)
+            sub_tasks = self.curriculum_agent.decompose_task(task, self.last_events)  # TODO X: call GPT4, 拆分子任务
         iter_without_new_item = 0
         last_item_history = set()
+
+        #
+        #
+        #
         while self.curriculum_agent.progress < len(sub_tasks):
-            next_task = sub_tasks[self.curriculum_agent.progress]
+            next_task = sub_tasks[self.curriculum_agent.progress]  # todo x: 从子任务集，提取最新子任务
             context = self.curriculum_agent.get_task_context(next_task)
             print(
                 f"\033[35mStarting task {next_task} for at most {self.action_agent_task_max_retries} times\033[0m"
             )
+
+            #
+            # todo x: 传入子任务， 继续执行
+            #
             messages, reward, done, info = self.rollout(
                 task=next_task,
                 context=context,

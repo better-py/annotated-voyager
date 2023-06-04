@@ -152,7 +152,10 @@ class CurriculumAgent:
         return len(self.completed_tasks)
 
     def render_system_message(self):
-        system_message = SystemMessage(content=load_prompt("curriculum"))
+        """todo x: 让 GPT4 分析当前游戏状态，生成一个新任务
+
+        """
+        system_message = SystemMessage(content=load_prompt("curriculum"))  # todo x: 加载 prompt
         assert isinstance(system_message, SystemMessage)
         return system_message
 
@@ -232,6 +235,9 @@ class CurriculumAgent:
             events=events, chest_observation=chest_observation
         )
         if self.progress >= self.warm_up["context"]:
+            #
+            #
+            #
             questions, answers = self.run_qa(
                 events=events, chest_observation=chest_observation
             )
@@ -285,7 +291,7 @@ class CurriculumAgent:
             return task, context
 
         messages = [
-            self.render_system_message(),
+            self.render_system_message(),  # todo x: 让 GPT4 分析当前游戏状态，生成一个新任务
             self.render_human_message(
                 events=events, chest_observation=chest_observation
             ),
@@ -392,9 +398,12 @@ class CurriculumAgent:
         U.dump_json(self.failed_tasks, f"{self.ckpt_dir}/curriculum/failed_tasks.json")
 
     def decompose_task(self, task, events):
+        """todo x: 让 GPT4 拆分子任务
+
+        """
         messages = [
             SystemMessage(
-                content=load_prompt("curriculum_task_decomposition"),
+                content=load_prompt("curriculum_task_decomposition"),  # todo x: 加载模板
             ),
             self.render_human_message(events=events, chest_observation=""),
             HumanMessage(content=f"Final task: {task}"),
@@ -402,7 +411,11 @@ class CurriculumAgent:
         print(
             f"\033[31m****Curriculum Agent task decomposition****\nFinal task: {task}\033[0m"
         )
-        response = self.llm(messages).content
+
+        #
+        #
+        #
+        response = self.llm(messages).content  # todo x: call GPT4
         print(f"\033[31m****Curriculum Agent task decomposition****\n{response}\033[0m")
         return fix_and_parse_json(response)
 
@@ -465,7 +478,10 @@ class CurriculumAgent:
         return context
 
     def render_system_message_qa_step1_ask_questions(self):
-        return SystemMessage(content=load_prompt("curriculum_qa_step1_ask_questions"))
+        """todo x: GPT4 任务目标: 发现尽可能多的东西，完成尽可能多的任务
+
+        """
+        return SystemMessage(content=load_prompt("curriculum_qa_step1_ask_questions"))  # todo x: 加载 prompt
 
     def render_human_message_qa_step1_ask_questions(self, *, events, chest_observation):
         observation = self.render_observation(
@@ -485,11 +501,15 @@ class CurriculumAgent:
         ]
         concepts = [biome, biome, biome]
         messages = [
-            self.render_system_message_qa_step1_ask_questions(),
+            self.render_system_message_qa_step1_ask_questions(),  # todo x: GPT4 任务目标: 发现尽可能多的东西，完成尽可能多的任务
             self.render_human_message_qa_step1_ask_questions(
                 events=events, chest_observation=chest_observation
             ),
         ]
+
+        #
+        # todo x: call GPT4
+        #
         qa_response = self.qa_llm(messages).content
         try:
             # Regex pattern to extract question and concept pairs

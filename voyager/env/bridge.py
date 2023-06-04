@@ -101,7 +101,7 @@ class VoyagerEnv(gym.Env):
         U.f_mkdir(self.log_path, "minecraft")
         return MinecraftInstance(
             **self.azure_login,
-            mineflayer=self.mineflayer, # todo x: 注意参数
+            mineflayer=self.mineflayer,  # todo x: 注意参数
             log_path=U.f_join(self.log_path, "minecraft"),
         )
 
@@ -198,7 +198,7 @@ class VoyagerEnv(gym.Env):
             raise RuntimeError("Failed to step Minecraft server")
         returned_data = res.json()
 
-        self.pause()         # todo x: 执行暂停操作
+        self.pause()  # todo x: 执行暂停操作
         return json.loads(returned_data)
 
     ########################################################################################
@@ -227,6 +227,8 @@ class VoyagerEnv(gym.Env):
             "waitTicks": options.get("wait_ticks", 5),
             "position": options.get("position", None),
         }
+
+        # =======================================================================
 
         self.unpause()
         self.mineflayer.stop()

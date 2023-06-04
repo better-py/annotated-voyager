@@ -12,7 +12,7 @@ from langchain.prompts import SystemMessagePromptTemplate
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
 
 from voyager.prompts import load_prompt
-from voyager.control_primitives_context import load_control_primitives_context
+from voyager.control_primitives_context import load_control_primitives_context  # todo x: 返回一组 js 文件
 
 
 class ActionAgent:
@@ -56,6 +56,9 @@ class ActionAgent:
         U.dump_json(self.chest_memory, f"{self.ckpt_dir}/action/chest_memory.json")
 
     def render_chest_observation(self):
+        """todo x: 金库（物品保管库）观察
+        """
+
         chests = []
         for chest_position, chest in self.chest_memory.items():
             if isinstance(chest, dict) and len(chest) > 0:
@@ -75,7 +78,14 @@ class ActionAgent:
             return f"Chests: None\n\n"
 
     def render_system_message(self, skills=[]):
-        system_template = load_prompt("action_template")
+        """todo x: call GPT, 让GPT自己写代码，实现控制功能
+
+        """
+        system_template = load_prompt("action_template")  # todo x: 让 GPT 自己写代码， 实现功能。
+
+        #
+        # todo x: 注意！ 这一组 skills 对应 voyager/control_primitives_context/ 的一组 js 文件！
+        #
         # FIXME: Hardcoded control_primitives
         base_skills = [
             "exploreUntil",
@@ -85,13 +95,25 @@ class ActionAgent:
             "smeltItem",
             "killMob",
         ]
-        if not self.llm.model_name == "gpt-3.5-turbo":
+        if not self.llm.model_name == "gpt-3.5-turbo":  # todo x: 模型版本低（便宜），增加2个方法
             base_skills += [
                 "useChest",
                 "mineflayer",
             ]
-        programs = "\n\n".join(load_control_primitives_context(base_skills) + skills)
-        response_format = load_prompt("action_response_format")
+
+        # =======================================================================
+
+        #
+        #
+        #
+        programs = "\n\n".join(load_control_primitives_context(base_skills) + skills)  # todo x: 返回一组 js 文件
+
+        # =======================================================================
+
+        #
+        #
+        #
+        response_format = load_prompt("action_response_format")  # todo x: GPT 返回内容格式
         system_message_prompt = SystemMessagePromptTemplate.from_template(
             system_template
         )
@@ -184,7 +206,7 @@ class ActionAgent:
                 task == "Place and deposit useless items into a chest"
                 or task.startswith("Deposit useless items into the chest at")
         ):
-            observation += self.render_chest_observation()
+            observation += self.render_chest_observation()  # todo x: 金库（保管库）观察
 
         observation += f"Task: {task}\n\n"
 
@@ -200,10 +222,15 @@ class ActionAgent:
 
         return HumanMessage(content=observation)
 
+    ########################################################################################
+
     #
-    # TODO X: 在 python 中调用 js lib
+    #
     #
     def process_ai_message(self, message):
+        """todo x: 🔥️🔥️🔥️🔥️ 核心方法！
+            - 在 python 中调用 js lib
+        """
         assert isinstance(message, AIMessage)
 
         retry = 3

@@ -53,7 +53,7 @@ class SkillManager:
         # =======================================================================
 
         #
-        # todo x: db 存储方案
+        # todo x: 存储方案: Chroma 向量数据库, 注意跟踪使用方法
         #
         self.vectordb = Chroma(
             collection_name="skill_vectordb",
@@ -95,7 +95,7 @@ class SkillManager:
 
         if program_name in self.skills:
             print(f"\033[33mSkill {program_name} already exists. Rewriting!\033[0m")
-            self.vectordb._collection.delete(ids=[program_name])
+            self.vectordb._collection.delete(ids=[program_name])  # todo x: 删除操作
             i = 2
             while f"{program_name}V{i}.js" in os.listdir(f"{self.ckpt_dir}/skill/code"):
                 i += 1
@@ -105,7 +105,7 @@ class SkillManager:
 
         # =======================================================================
 
-        # todo x:
+        # todo x: 存储
         self.vectordb.add_texts(
             texts=[skill_description],
             ids=[program_name],
@@ -129,7 +129,7 @@ class SkillManager:
 
         # =======================================================================
 
-        self.vectordb.persist()
+        self.vectordb.persist()  # todo x: 数据持久化
 
     def generate_skill_description(self, program_name, program_code):
         messages = [
@@ -144,11 +144,18 @@ class SkillManager:
         return f"async function {program_name}(bot) {{\n{skill_description}\n}}"
 
     def retrieve_skills(self, query):
+        """todo x: 检索向量数据库, 尝试复用技能
+
+        """
         k = min(self.vectordb._collection.count(), self.retrieval_top_k)
         if k == 0:
             return []
         print(f"\033[33mSkill Manager retrieving for {k} skills\033[0m")
-        docs_and_scores = self.vectordb.similarity_search_with_score(query, k=k)
+
+        #
+        #
+        #
+        docs_and_scores = self.vectordb.similarity_search_with_score(query, k=k)  # todo x: 检索数据（相似度）
         print(
             f"\033[33mSkill Manager retrieved skills: "
             f"{', '.join([doc.metadata['name'] for doc, _ in docs_and_scores])}\033[0m"
