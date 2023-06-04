@@ -201,14 +201,20 @@ class Voyager:
         # init variables for rollout
         self.action_agent_rollout_num_iter = -1
         self.task = None
-        self.context = ""  # todo x: 上下文，在 .reset() 中更新
 
         # =======================================================================
 
         #
+        # todo x: ⛔️⛔️⛔️ 注意! 跟踪此值调用链路!
         #
+        self.context = ""  # todo x: ⛔️糟糕的使用方式！上下文，在 .reset() 中更新
+
+        # =======================================================================
+
         #
-        self.messages = None  # todo x: 糟糕的使用方式！共享变量: 隐式赋值(self.reset()方法) + 隐式调用(self.step()方法）.
+        # todo x: ⛔️⛔️⛔️ 注意! 跟踪此值调用链路!
+        #
+        self.messages = None  # todo x: ⛔️糟糕的使用方式！共享变量: 隐式赋值(self.reset()方法) + 隐式调用(self.step()方法）.
         self.conversations = []
         self.last_events = None
 

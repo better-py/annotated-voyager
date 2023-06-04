@@ -1,8 +1,69 @@
 # annotated-voyager:
 
-- ️✅️ 源码分析笔记:
-    - [annotated-notes.md](annotated-notes.md): 笔记
-    - [annotated-notes.ipynb](annotated-notes.ipynb): 重要代码片段分析
+## 🆚️ 源码分析笔记:
+
+- ✅️ [annotated-notes.md](annotated-notes.md): 笔记
+- ✅️ [annotated-notes.ipynb](annotated-notes.ipynb): 重要代码片段分析
+
+## 🔥️源码目录详细说明:
+
+- ✅️ [voyager/voyager.py](voyager/voyager.py): 源码入口. 请从 .learn() 方法开始看！
+- ✅️ 如下是完整的源码目录结构说明：
+
+```ruby
+
+❯ tree ./voyager/ -L 3
+./voyager/
+├── __init__.py
+├── agents                  // ✅️ GPT bot 代理
+│   ├── __init__.py
+│   ├── action.py           // 🔥️ GPT bot 任务执行: 生成js代码 + 执行js代码
+│   ├── critic.py           // 🔥️ GPT bot 任务执行结果监督
+│   ├── curriculum.py       // 🔥️ GPT bot 自主学习过程
+│   └── skill.py            // 🔥️ GPT bot 技能库
+├── control_primitives      // ✅️ GPT bot 一组初始技能（js代码）
+│   ├── __init__.py         // 🔥️ 注意此文件里的方法！（提取js代码）
+│   ├── killMob.js
+│   ├── mineBlock.js
+│   ├── shoot.js
+├── control_primitives_context // ✅️ GPT bot 一组初始技能上下文（js代码）
+│   ├── __init__.py            // 🔥️ 注意此文件里的方法！（提取js代码）
+│   ├── mineBlock.js
+│   ├── mineflayer.js
+├── env                       // ✅️ GPT bot 依赖的本地运行的 mineflayer server 代理，用于执行 js 代码
+│   ├── __init__.py
+│   ├── bridge.py             // 🔥️ GPT bot 的 HTTP 代理，HTTP POST 执行 JS 代码.
+│   ├── minecraft_launcher.py // 🔥️ Minecraft 登录 + 启动 mineflayer server 
+│   ├── mineflayer
+│   │   ├── index.js          // 🔥️ mineflayer server 启动，内部定义一组 HTTP API(前面 python 中的 bridge.py 会调用这些 API)
+│   │   ├── lib
+│   │   ├── mineflayer-collectblock
+│   │   └── package.json
+│   └── process_monitor.py
+├── prompts                   // ✅️ GPT bot 的 prompts 定义，学习 prompts 编写技巧（请看 .zh.yml 翻译文件）
+│   ├── __init__.py
+│   ├── action_response_format.txt
+│   ├── action_template.txt
+│   ├── action_template.zh.yml // 🔥️ 请看此 prompt 翻译文件
+│   ├── critic.txt
+│   ├── critic.zh.yml          // 🔥️ 请看此 prompt 翻译文件
+│   ├── curriculum.txt
+│   ├── curriculum.zh.yml
+├── utils                     // ✅️ GPT bot 依赖的工具类, txt，json，读写方法
+│   ├── __init__.py
+│   ├── file_utils.py
+│   ├── json_utils.py
+│   └── record_utils.py
+└── voyager.py               // 🚀️️ GPT bot 主程序入口，请从 .learn() 方法开始看！
+
+9 directories, 54 files
+
+
+```
+
+
+
+
 
 ️🔥️🔥️🔥️🔥️🔥️🔥️🔥️🔥️🔥️🔥️🔥️🔥️🔥️🔥️🔥️🔥️🔥️🔥️🔥️🔥️🔥️🔥
 

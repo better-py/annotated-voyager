@@ -5,9 +5,29 @@
 - ✅️ `# todo x`： 为注解标识符， 方便利用 IDE 的 TODO 工具，快速筛查注解点。
 - ✅️ 源码文件，`核心链路和功能`， 都做了`详细注解`，注解`越多`越重要，注意抓重点。
 - ❎️ `未注解`的代码，通常都可以`忽略+跳过不看`（不重要+不影响理解）。
+
+
+<img width="400" src="./images/notes/img1.png"  alt=""/>
+
+> 项目入口说明：
+
 - ✅️ 建议从 [voyager/voyager.py](voyager/voyager.py) 的 `learn()` 方法，读起。
 
-![](./images/note-1.png)
+
+<img width="300" src="./images/notes/img2.png"  alt=""/>
+
+
+> agents:
+
+- ✅️ [voyager/agents/curriculum.py](voyager/agents/curriculum.py): GPT BOT 自主学习技能
+- ✅️ [voyager/agents/action.py](voyager/agents/action.py): GPT BOT 执行任务
+- ✅️ [voyager/agents/critic.py](voyager/agents/critic.py): GPT BOT 对执行结果，自主评估
+- ✅️ [voyager/agents/skill.py](voyager/agents/skill.py): GPT BOT 记录新学习的技能（new_skill)
+
+
+<img width="400" src="./images/notes/img3.png"  alt=""/>
+
+
 
 ## 补充知识：
 
