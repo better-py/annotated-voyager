@@ -39,6 +39,9 @@ class CurriculumAgent:
             temperature=temperature,
             request_timeout=request_timout,
         )
+
+        # =======================================================================
+
         #
         # TODO X: 基于 langchain + ChatOpenAI， 创建一个 LLM 模型对象，
         #
@@ -266,14 +269,23 @@ class CurriculumAgent:
     ########################################################################################
 
     #
-    # todo x: 生成建议执行的下一个 task， 2种生成模式（手动 vs AI 自动）
+    #
     #
     def propose_next_task(self, *, events, chest_observation, max_retries=5):
+        """todo x: 🔥️🔥️🔥️ 核心方法： 生成建议执行的下一个 next_task
+            - 2种生成模式（GPT 自动生成 vs 手动输入 ）
+
+        """
         if self.progress == 0 and self.mode == "auto":
             task = "Mine 1 wood log"
             context = "You can mine one of oak, birch, spruce, jungle, acacia, dark oak, or mangrove logs."
             return task, context
 
+        # =======================================================================
+
+        #
+        # todo x: 生成清理任务(task): 将无用物品放入箱子中
+        #
         # hard code task when inventory is almost full
         if events[-1][1]["status"]["inventoryUsed"] >= 33:
             task = "Place and deposit useless items into a chest"
@@ -290,6 +302,11 @@ class CurriculumAgent:
             )
             return task, context
 
+        # =======================================================================
+
+        #
+        # todo x: 🔥️🔥️🔥️ 生成常规任务(task): 收集某种物品
+        #
         messages = [
             self.render_system_message(),  # todo x: 让 GPT4 分析当前游戏状态，生成一个新任务
             self.render_human_message(
@@ -301,28 +318,31 @@ class CurriculumAgent:
 
         if self.mode == "auto":
             #
-            # todo x: AI 自动生成新 task 模式，从 AI 回答中提取 next_task
             #
-            return self.propose_next_ai_task(messages=messages, max_retries=max_retries)
+            #
+            return self.propose_next_ai_task(messages=messages,
+                                             max_retries=max_retries)  # todo x: call GPT, 自动生成 next_task，并返回
         elif self.mode == "manual":
             #
-            # todo x: 命令行手动输入 task 模式
             #
-            return self.propose_next_manual_task()
+            #
+            return self.propose_next_manual_task()  # todo x: 命令行手动输入 task 模式
         else:
             raise ValueError(f"Invalid curriculum agent mode: {self.mode}")
 
     ########################################################################################
 
     #
-    # todo x: 调用 OpenAI(GPT), 让 AI 生成 next_task
+    #
     #
     def propose_next_ai_task(self, *, messages, max_retries=5):
+        """todo x: call OpenAI(GPT), 让 AI 生成 next_task，并返回
+
+        """
         #
-        # todo x: call OpenAI(GPT), 获得 AI 回答内容
-        #  - 基于 langchain + OpenAI 创建 LLM 代理，调用后，返回内容
         #
-        curriculum = self.llm(messages).content
+        #
+        curriculum = self.llm(messages).content  # todo x: call GPT, 执行 messages， 并返回
         print(f"\033[31m****Curriculum Agent ai message****\n{curriculum}\033[0m")
 
         # =======================================================================

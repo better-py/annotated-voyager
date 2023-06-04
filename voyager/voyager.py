@@ -214,13 +214,18 @@ class Voyager:
 
     def reset(self, task, context="", reset_env=True):
         """todo x: 跟踪 task 和 context 流转链路
+            - 此方法， 写法比较脏！
+            - 核心用途：隐式更新了 self.context 和 self.messages.
+            - 这2个值， 在其他方法中，被隐式+直接使用！
 
         """
         self.action_agent_rollout_num_iter = 0
         self.task = task
 
+        # =======================================================================
+
         #
-        #
+        # todo x: ⛔️⛔️⛔️注意！！！糟糕用法，共享变量， 注意 self.context 的使用链！
         #
         self.context = context  # todo x: 注意上下文的更新+使用链
         if reset_env:
@@ -268,8 +273,10 @@ class Voyager:
             events=events, code="", task=self.task, context=context, critique=""
         )
 
+        # =======================================================================
+
         #
-        # todo x: 比较糟糕的用法, 使用 self.messages 作内部数据共享。（跟踪此变量的调用处， 隐式操作）
+        # todo x: ⛔️⛔️⛔️注意！比较糟糕的用法, 使用 self.messages 作内部数据共享。（跟踪此变量的调用处， 隐式操作）
         #   - 注意， 此时 GPT 生成的代码，还未被执行。 具体在 self.step() 中执行的。（非常隐晦）
         #
         self.messages = [system_message, human_message]  # todo x: 糟糕的初始化方式！隐式被 self.step() 使用
@@ -431,19 +438,28 @@ class Voyager:
     ########################################################################################
 
     def rollout(self, *, task, context, reset_env=True):
-        """todo x: 传入具体任务（task）和上下文（context）, 执行核心逻辑
+        """todo x:  🔥️🔥️🔥️🔥️ 核心方法.
+            - 传入具体任务（task）和上下文（context）, 执行核心逻辑
             - 注意 task 的流转链路
+            - 详细功能： GPT 自主分析任务 -> 生成 JS 代码 -> call mineflayer server, 执行 js 代码 -> 反馈 new_skill
 
         """
         #
-        #
+        # todo x: ⛔️⛔️⛔️ 注意！核心工作，隐式更新了 self.messages 值，此值在 self.step() 中被使用
         #
         self.reset(task=task, context=context, reset_env=reset_env)  # todo x: 注意更新上下文值
 
-        #
-        # todo x:
-        #
+        # =======================================================================
+
         while True:
+            #
+            # todo x: GPT 自己分析任务+自主写JS代码+自动执行+自动反馈（判断执行效果）
+            #   - 1. call GPT 分析任务，并生成 JS 代码
+            #   - 2. 对 JS 代码预处理：基于 python + javascript + babel 预处理
+            #   - 3. 通过 HTTP 请求本地启动的 mineflayer 服务, 远程执行 js 代码
+            #   - 4. GPT 自主判定：对执行结果进行判断，判断任务是否完成
+            #   - 5. 并返回新学会的技能 new_skill
+            #
             messages, reward, done, info = self.step()  # todo x: 核心操作， AI(GPT) + JS
             if done:
                 break
@@ -452,11 +468,11 @@ class Voyager:
     ########################################################################################
 
     #
-    # todo x: 核心方法
+    #
     #
     def learn(self, reset_env=True):
-        """
-        TODO X: Learn a task
+        """TODO X: 🔥️🔥️🔥️🔥️🔥️ 核心方法
+            - Learn a task
 
         """
         if self.resume:
@@ -480,9 +496,11 @@ class Voyager:
         # =======================================================================
 
         #
-        # todo x: HTTP 请求本地启动的 mineflayer 服务
+        # todo x: 🔥️🔥️🔥️ HTTP 请求本地启动的 mineflayer 服务
+        #   - 获取最近的上一次操作结果
+        #   - 接下来， 根据此结果，让GPT推理+判断，生成新的task，并自主执行
         #
-        self.last_events = self.env.step("")
+        self.last_events = self.env.step("")  # todo x: 此时 code=""，programs="" 为空
 
         # =======================================================================
 
@@ -497,8 +515,8 @@ class Voyager:
             # =======================================================================
 
             #
-            # todo x: 处理 task 模式， 自动处理 vs 手动输入
-            #   - 注意此处的 context 值，后续传递链
+            # todo x: 🔥️🔥️🔥️🔥️ 处理 task 模式， 自动处理 vs 手动输入
+            #   - 注意此处的 task 和 context 值，后续传递链路
             #
             task, context = self.curriculum_agent.propose_next_task(
                 events=self.last_events,
@@ -513,7 +531,8 @@ class Voyager:
 
             try:
                 #
-                # todo x: 传入具体任务（task）和上下文（context）, 执行核心逻辑
+                # todo x:  🔥️🔥️🔥️🔥️ 传入具体任务（task）和上下文（context）, 执行核心逻辑
+                #   - GPT 自主学习 -> 分析任务 -> 生成JS代码 -> 执行JS代码 -> 结果反馈，返回新学会的技能 new_skill
                 #
                 messages, reward, done, info = self.rollout(
                     task=task,
@@ -546,23 +565,16 @@ class Voyager:
 
             # =======================================================================
 
-            #
-            #
-            #
             if info["success"]:
                 print(f"\033[35mCompleted task {task}.\033[0m")
 
                 #
-                # todo x:
+                # todo x: GPT 将新学会的技能（js），保存到向量数据库
                 #
                 self.skill_manager.add_skill(
                     program_name=info["program_name"],
                     program_code=info["program_code"],
                 )
-
-                #
-                #
-                #
                 self.curriculum_agent.completed_tasks.append(task)
             else:
                 self.curriculum_agent.failed_tasks.append(task)
@@ -604,6 +616,8 @@ class Voyager:
         self.curriculum_agent.completed_tasks = []
         self.curriculum_agent.failed_tasks = []
 
+        # =======================================================================
+
         #
         # todo x: HTTP 请求本地启动的 mineflayer 服务
         #
@@ -613,9 +627,8 @@ class Voyager:
         iter_without_new_item = 0
         last_item_history = set()
 
-        #
-        #
-        #
+        # =======================================================================
+
         while self.curriculum_agent.progress < len(sub_tasks):
             next_task = sub_tasks[self.curriculum_agent.progress]  # todo x: 从子任务集，提取最新子任务
             context = self.curriculum_agent.get_task_context(next_task)
@@ -623,8 +636,11 @@ class Voyager:
                 f"\033[35mStarting task {next_task} for at most {self.action_agent_task_max_retries} times\033[0m"
             )
 
+            # =======================================================================
+
             #
-            # todo x: 传入子任务， 继续执行
+            # todo x: 🔥️🔥️🔥️🔥️ 传入子任务(next_task)和上下文(context), 继续执行
+            #   - GPT 自主学习 -> 分析任务 -> 生成JS代码 -> 执行JS代码 -> 结果反馈，返回新学会的技能 new_skill
             #
             messages, reward, done, info = self.rollout(
                 task=next_task,

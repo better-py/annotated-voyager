@@ -86,6 +86,10 @@ class SkillManager:
     #
     #
     def add_skill(self, program_name, program_code):
+        """todo x: 将GPT新学会的技能，存入向量数据库。
+            - 包含技能描述信息和技能代码（js）
+
+        """
         skill_description = self.generate_skill_description(program_name, program_code)
         print(
             f"\033[33mSkill Manager generated description for {program_name}:\n{skill_description}\033[0m"
